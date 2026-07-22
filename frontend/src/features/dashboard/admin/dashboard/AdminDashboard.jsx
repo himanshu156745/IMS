@@ -1,20 +1,16 @@
 import PageHeader from "../../../../components/ui/PageHeader";
 import StatCard from "../../../../components/ui/StatCard";
-import WelcomeBanner from "../components/WelcomeBanner";
-import QuickActions from "../components/QuickActions";
-import StudentGrowthChart from "../components/StudentGrowthChart";
-import MonthlyStatusChart from "../components/MonthlyStatusChart";
-import DepartmentDonutChart from "../components/DepartmentDonutChart";
-import ApplicationTrendsChart from "../components/ApplicationTrendsChart";
-import RecentApplicationsTable from "../components/RecentApplicationsTable";
-import RecentStudents from "../components/RecentStudents";
-import TopHiringCompanies from "../components/TopHiringCompanies";
-import FacultyOverview from "../components/FacultyOverview";
-import RecentActivity from "./components/RecentActivity";
+import WelcomeBanner from "./components/WelcomeBanner";
+import QuickActions from "./components/QuickActions";
+import StudentGrowthChart from "./components/StudentGrowthChart";
+import MonthlyStatusChart from "./components/MonthlyStatusChart";
+import DepartmentDonutChart from "./components/DepartmentDonutChart";
+import ApplicationTrendsChart from "./components/ApplicationTrendsChart";
+import RecentApplicationsTable from "./components/RecentApplicationsTable";
+import RecentStudents from "./components/RecentStudents";
+import TopHiringCompanies from "./components/TopHiringCompanies";
+import FacultyOverview from "./components/FacultyOverview";
 
-// TODO: replace every MOCK_* array (in each widget file) with real API data
-// via TanStack Query once backend endpoints (modules/users, companies,
-// internships, applications) are wired.
 const STATS = [
   { label: "Total Students", value: "1,148", trend: 12.4, status: "onTrack" },
   { label: "Total Faculty", value: "84", trend: 3.1, status: "onTrack" },
@@ -30,7 +26,6 @@ export default function AdminDashboard() {
   return (
     <>
       <PageHeader title="Dashboard" subtitle="Your internship ecosystem at a glance." />
-
       <WelcomeBanner name="Admin" />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">

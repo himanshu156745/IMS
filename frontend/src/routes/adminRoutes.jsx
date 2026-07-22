@@ -1,17 +1,16 @@
 import DashboardLayout from "../layouts/DashboardLayout";
-import AdminDashboard from "../features/dashboard/admin/pages/AdminDashboard";
-import ManageStudents from "../features/dashboard/admin/pages/ManageStudents";
-import ManageCompanies from "../features/dashboard/admin/pages/ManageCompanies";
-import ManageFaculty from "../features/dashboard/admin/pages/ManageFaculty";
-import ManageInternships from "../features/dashboard/admin/pages/ManageInternships";
-import ViewApplications from "../features/dashboard/admin/pages/ViewApplications";
-import ReportsAnalytics from "../features/dashboard/admin/pages/ReportsAnalytics";
-import AdminSettings from "../features/dashboard/admin/pages/AdminSettings";
-// import ProtectedRoute + RoleBasedRoute here once auth/ module is wired
+import AdminDashboard from "../features/dashboard/admin/dashboard/AdminDashboard";
+import ManageStudents from "../features/dashboard/admin/students/ManageStudents";
+import ManageCompanies from "../features/dashboard/admin/companies/ManageCompanies";
+import ManageFaculty from "../features/dashboard/admin/faculty/ManageFaculty";
+import ManageInternships from "../features/dashboard/admin/internships/ManageInternships";
+import ViewApplications from "../features/dashboard/admin/applications/ViewApplications";
+import ReportsAnalytics from "../features/dashboard/admin/reports/ReportsAnalytics";
+import AdminSettings from "../features/dashboard/admin/settings/AdminSettings";
 
 const adminRoutes = {
   path: "/admin",
-  element: <DashboardLayout />, // wrap with <RoleBasedRoute role="super_admin"> later
+  element: <DashboardLayout />,
   children: [
     { index: true, element: <AdminDashboard /> },
     { path: "students", element: <ManageStudents /> },
