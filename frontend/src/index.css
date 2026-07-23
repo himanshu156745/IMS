@@ -10,7 +10,6 @@
   --color-coral: #B3492F;
   --color-coral-light: #F3DDD6;
   --color-slate: #5B6472;
-   /* Manage Internships page palette */
   --color-primary: #2563EB;
   --color-primary-bg: #EFF4FF;
   --color-surface-alt: #F8FAFC;
@@ -23,6 +22,16 @@
   --color-danger-bg: #FEE2E2;
   --color-heading: #0F172A;
   --color-line: #E2E8F0;
+
+  /* Faculty ke purane brand/navy names ko naye theme se map kiya */
+  --color-brand-50: #EFF4FF;
+  --color-brand-100: #DBEAFE;
+  --color-brand-400: #60A5FA;
+  --color-brand-500: #2563EB;
+  --color-brand-600: #1D4ED8;
+
+  --color-navy-800: #1E2029;
+  --color-navy-900: #12131A;
 
   --font-display: "Fraunces", serif;
   --font-body: "Inter", sans-serif;
@@ -38,6 +47,7 @@
     @apply font-display text-ink;
   }
 }
+
 @layer utilities {
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-4px); }
@@ -46,5 +56,44 @@
   @keyframes expandIn {
     from { opacity: 0; transform: translateY(-6px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@utility animate-fadeIn {
+  animation: fadeIn 0.35s ease-out;
+}
+
+@utility shadow-card {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+@utility shadow-cardHover {
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.06);
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl shadow-card border border-line transition-shadow duration-300;
+  }
+  .card:hover {
+    @apply shadow-cardHover;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-brand-600 active:scale-[0.98];
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-semibold text-slate transition-all duration-200 hover:bg-surface-alt active:scale-[0.98];
+  }
+  .input-field {
+    @apply w-full rounded-xl border border-line bg-white px-4 py-2.5 text-sm text-ink placeholder:text-slate outline-none transition-all duration-200 focus:border-brand-400 focus:ring-4 focus:ring-brand-50;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+  .sidebar-link {
+    @apply flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-300 transition-all duration-200 hover:bg-white/5 hover:text-white;
+  }
+  .sidebar-link-active {
+    @apply bg-brand-500 text-white shadow-lg shadow-brand-500/30;
   }
 }
