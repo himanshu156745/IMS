@@ -3,6 +3,7 @@ import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { FiPlus, FiDownload, FiRefreshCw } from "react-icons/fi";
 import PageHeader from "../../../../components/ui/PageHeader";
 
+import CompaniesSkeleton from "./components/CompaniesSkeleton";
 import CompanyStats from "./components/CompanyStats";
 import CompanyFilters from "./components/CompanyFilters";
 import CompanyTable from "./components/CompanyTable";
@@ -80,7 +81,7 @@ export default function ManageCompanies() {
         (c) =>
           c.name.toLowerCase().includes(q) ||
           c.hrName.toLowerCase().includes(q) ||
-          c.email.toLowerCase().includes(q)
+          c.email.toLowerCase().includes(q),
       );
     }
     if (filters.industry !== "All Industries") {
@@ -107,7 +108,9 @@ export default function ManageCompanies() {
         rows.sort((a, b) => b.studentsAssigned - a.studentsAssigned);
         break;
       case "date-desc":
-        rows.sort((a, b) => new Date(b.registrationDate) - new Date(a.registrationDate));
+        rows.sort(
+          (a, b) => new Date(b.registrationDate) - new Date(a.registrationDate),
+        );
         break;
       default:
         rows.sort((a, b) => a.name.localeCompare(b.name));
@@ -121,7 +124,10 @@ export default function ManageCompanies() {
     return filteredCompanies.slice(start, start + PAGE_SIZE);
   }, [filteredCompanies, page]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredCompanies.length / PAGE_SIZE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredCompanies.length / PAGE_SIZE),
+  );
 
   // Reset to page 1 whenever filters change.
   useEffect(() => setPage(1), [filters]);
@@ -142,16 +148,24 @@ export default function ManageCompanies() {
 
   const handleVerify = (company) => {
     setCompanies((prev) =>
-      prev.map((c) => (c.id === company.id ? { ...c, verificationStatus: "Verified" } : c))
+      prev.map((c) =>
+        c.id === company.id ? { ...c, verificationStatus: "Verified" } : c,
+      ),
     );
   };
   const handleSuspend = (company) => {
     setCompanies((prev) =>
-      prev.map((c) => (c.id === company.id ? { ...c, status: "Inactive", verificationStatus: "Suspended" } : c))
+      prev.map((c) =>
+        c.id === company.id
+          ? { ...c, status: "Inactive", verificationStatus: "Suspended" }
+          : c,
+      ),
     );
   };
   const handleActivate = (company) => {
-    setCompanies((prev) => prev.map((c) => (c.id === company.id ? { ...c, status: "Active" } : c)));
+    setCompanies((prev) =>
+      prev.map((c) => (c.id === company.id ? { ...c, status: "Active" } : c)),
+    );
   };
 
   const requestDelete = (company) => {
@@ -170,7 +184,9 @@ export default function ManageCompanies() {
   };
 
   const handleEditSave = (updatedCompany) => {
-    setCompanies((prev) => prev.map((c) => (c.id === updatedCompany.id ? updatedCompany : c)));
+    setCompanies((prev) =>
+      prev.map((c) => (c.id === updatedCompany.id ? updatedCompany : c)),
+    );
     setEditOpen(false);
     setEditTarget(null);
   };
@@ -181,7 +197,15 @@ export default function ManageCompanies() {
   };
 
   const handleExport = () => {
-    const header = ["Name", "Industry", "Location", "HR Name", "Email", "Status", "Verification"];
+    const header = [
+      "Name",
+      "Industry",
+      "Location",
+      "HR Name",
+      "Email",
+      "Status",
+      "Verification",
+    ];
     const rows = filteredCompanies.map((c) => [
       c.name,
       c.industry,
@@ -191,7 +215,9 @@ export default function ManageCompanies() {
       c.status,
       c.verificationStatus,
     ]);
-    const csv = [header, ...rows].map((r) => r.map((v) => `"${v}"`).join(",")).join("\n");
+    const csv = [header, ...rows]
+      .map((r) => r.map((v) => `"${v}"`).join(","))
+      .join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -200,6 +226,10 @@ export default function ManageCompanies() {
     link.click();
     URL.revokeObjectURL(url);
   };
+
+  if (loading) {
+    return <CompaniesSkeleton />;
+  }
 
   return (
     <div className="space-y-6 pb-10">
@@ -233,7 +263,7 @@ export default function ManageCompanies() {
         }
       />
 
-      <CompanyStats stats={stats} loading={loading} />
+      {/* <CompanyStats stats={stats} loading={loading} /> */}
 
       <CompanyFilters filters={filters} onChange={handleFiltersChange} />
 
@@ -241,7 +271,6 @@ export default function ManageCompanies() {
         <div className="xl:col-span-2">
           <CompanyTable
             companies={paginatedCompanies}
-            loading={loading}
             page={page}
             totalPages={totalPages}
             onPageChange={setPage}
@@ -261,9 +290,17 @@ export default function ManageCompanies() {
         </div>
       </div>
 
-      <CompanyProfileDrawer company={selectedCompany} open={drawerOpen} onClose={closeProfile} />
+      <CompanyProfileDrawer
+        company={selectedCompany}
+        open={drawerOpen}
+        onClose={closeProfile}
+      />
 
-      <AddCompanyModal open={addOpen} onClose={() => setAddOpen(false)} onSave={handleAddSave} />
+      <AddCompanyModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onSave={handleAddSave}
+      />
 
       <EditCompanyModal
         open={editOpen}

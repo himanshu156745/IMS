@@ -5,7 +5,7 @@ import ManageCompanies from "../features/dashboard/admin/companies/ManageCompani
 import ManageFaculty from "../features/dashboard/admin/faculty/ManageFaculty";
 import ManageInternships from "../features/dashboard/admin/internships/ManageInternships";
 import ViewApplications from "../features/dashboard/admin/applications/ViewApplications";
-import ReportAnalytics from "../features/dashboard/admin/reports";
+import ReportsAnalytics from "../features/dashboard/admin/reports/ReportsAnalytics";
 import AdminSettings from "../features/dashboard/admin/settings/AdminSettings";
 
 const adminRoutes = {
@@ -18,7 +18,7 @@ const adminRoutes = {
     { path: "faculty", element: <ManageFaculty /> },
     { path: "internships", element: <ManageInternships /> },
     { path: "applications", element: <ViewApplications /> },
-    { path: "reports", element: <ReportAnalytics /> },
+    { path: "reports", element: <ReportsAnalytics /> },
     { path: "settings", element: <AdminSettings /> },
   ],
 };

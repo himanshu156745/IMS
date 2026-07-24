@@ -1,21 +1,3 @@
-// import { useState, useMemo, useEffect } from "react";
-// import { Download, Upload } from "lucide-react";
-// import PageHeader from "../../../../components/ui/PageHeader";
-// import Pagination from "../../../../components/ui/Pagination";
-// import ApplicationStats from "./ApplicationStats";
-// import ApplicationFilters from "./ApplicationFilters";
-// import ApplicationsTable from "./ApplicationsTable";
-// import BulkActionBar from "./BulkActionBar";
-// import NotificationPanel from "./NotificationPanel";
-// import ActivityTimeline from "./ActivityTimeline";
-// import AnalyticsSection from "./AnalyticsSection";
-// import StudentProfileDrawer from "./StudentProfileDrawer";
-// import ResumePreviewModal from "./ResumePreviewModal";
-// import InterviewScheduler from "./InterviewScheduler";
-// import EmptyApplications from "./EmptyApplications";
-// import LoadingSkeleton from "./LoadingSkeleton";
-// import { APPLICATIONS } from "./data/applicationsData";
-
 import { useState, useMemo, useEffect } from "react";
 import { Download, Upload } from "lucide-react";
 import PageHeader from "../../../../components/ui/PageHeader";
@@ -31,7 +13,7 @@ import StudentProfileDrawer from "./components/StudentProfileDrawer";
 import ResumePreviewModal from "./components/ResumePreviewModal";
 import InterviewScheduler from "./components/InterviewScheduler";
 import EmptyApplications from "./components/EmptyApplications";
-import LoadingSkeleton from "./components/LoadingSkeleton";
+import ApplicationsSkeleton from "./components/ApplicationsSkeleton";
 import { APPLICATIONS } from "./data/applicationsData";
 
 const PAGE_SIZE = 10;
@@ -191,6 +173,14 @@ export default function ViewApplications() {
     }
   };
 
+  if (initialLoading) {
+    return (
+      <div className="bg-surface-alt/40 -m-6 md:-m-8 p-6 md:p-8 min-h-full">
+        <ApplicationsSkeleton />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-surface-alt/40 -m-6 md:-m-8 p-6 md:p-8 min-h-full">
       <PageHeader
@@ -215,77 +205,60 @@ export default function ViewApplications() {
           </>
         }
       />
+      <div className="space-y-5">
+        <ApplicationStats applications={applications} />
 
-      {initialLoading ? (
-        <LoadingSkeleton />
-      ) : (
-        <div className="space-y-5">
-          <ApplicationStats applications={applications} />
+        <NotificationPanel applications={applications} />
 
-          {/* <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-            <div className="xl:col-span-2">
-              <NotificationPanel applications={applications} />
-            </div>
-            <ActivityTimeline
-              activities={applications.slice(0, 5).map((a) => ({
-                text: `${a.student.name} — ${a.status} for ${a.internship.title}`,
-                time: a.appliedDate,
-              }))}
+        <ApplicationFilters
+          filters={filters}
+          onChange={(f) => {
+            setFilters(f);
+            setPage(1);
+          }}
+          onReset={handleReset}
+        />
+
+        <BulkActionBar
+          selectedCount={selectedIds.length}
+          onBulkAction={handleBulkAction}
+          onClear={() => setSelectedIds([])}
+        />
+
+        {filtered.length === 0 ? (
+          <EmptyApplications onResetFilters={handleReset} />
+        ) : (
+          <>
+            <ApplicationsTable
+              rows={paginated}
+              loading={false}
+              selectedIds={selectedIds}
+              onToggleSelect={toggleSelect}
+              onToggleSelectAll={toggleSelectAll}
+              onAction={handleAction}
             />
-          </div> */}
 
-          <NotificationPanel applications={applications} />
-          {/* <AnalyticsSection applications={applications} /> */}
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
 
-          <ApplicationFilters
-            filters={filters}
-            onChange={(f) => {
-              setFilters(f);
-              setPage(1);
-            }}
-            onReset={handleReset}
-          />
-
-          <BulkActionBar
-            selectedCount={selectedIds.length}
-            onBulkAction={handleBulkAction}
-            onClear={() => setSelectedIds([])}
-          />
-
-          {filtered.length === 0 ? (
-            <EmptyApplications onResetFilters={handleReset} />
-          ) : (
-            <>
-              <ApplicationsTable
-                rows={paginated}
-                loading={false}
-                selectedIds={selectedIds}
-                onToggleSelect={toggleSelect}
-                onToggleSelectAll={toggleSelectAll}
-                onAction={handleAction}
-              />
-              <Pagination
-                page={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
-              />
-
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mt-6">
-                <div className="xl:col-span-2">
-                  <AnalyticsSection applications={applications} />
-                </div>
-
-                <ActivityTimeline
-                  activities={applications.slice(0, 5).map((a) => ({
-                    text: `${a.student.name} — ${a.status} for ${a.internship.title}`,
-                    time: a.appliedDate,
-                  }))}
-                />
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mt-6">
+              <div className="xl:col-span-2">
+                <AnalyticsSection applications={applications} />
               </div>
-            </>
-          )}
-        </div>
-      )}
+
+              <ActivityTimeline
+                activities={applications.slice(0, 5).map((a) => ({
+                  text: `${a.student.name} — ${a.status} for ${a.internship.title}`,
+                  time: a.appliedDate,
+                }))}
+              />
+            </div>
+          </>
+        )}
+      </div>
 
       {profileApp && (
         <StudentProfileDrawer
