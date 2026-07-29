@@ -18,9 +18,21 @@ const LandingPage = () => {
 
         <button
           onClick={() => navigate("/students")}
-          className="px-8 py-4 cursor-pointer rounded-xl text-white font-semibold text-lg bg-gradient-to-r from-sky-500 to-violet-600 hover:from-sky-600 hover:to-violet-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
+          className="px-8 mb-4 py-4 cursor-pointer rounded-xl text-white font-semibold text-lg bg-gradient-to-r from-sky-500 to-violet-600 hover:from-sky-600 hover:to-violet-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
         >
           Go to Student Dashboard
+        </button>
+        <button
+          onClick={() => navigate("/admin")}
+          className="px-8 mb-4 py-4 cursor-pointer rounded-xl text-white font-semibold text-lg bg-gradient-to-r from-sky-500 to-violet-600 hover:from-sky-600 hover:to-violet-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
+        >
+          Go to admin Dashboard
+        </button>
+        <button
+          onClick={() => navigate("/faculty")}
+          className="px-8 mb-4 py-4 cursor-pointer rounded-xl text-white font-semibold text-lg bg-gradient-to-r from-sky-500 to-violet-600 hover:from-sky-600 hover:to-violet-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
+        >
+          Go to faculty Dashboard
         </button>
       </div>
     </div>
