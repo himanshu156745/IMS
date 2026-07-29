@@ -1,18 +1,14 @@
+@import "tailwindcss";
+
+/* Custom styles for smooth scrolling and better UX */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  scroll-behavior: smooth;
 }
 
 body {
-  font-family: Arial, sans-serif;
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center; 
-  align-items: center;    
-  height: 100vh;          
-  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

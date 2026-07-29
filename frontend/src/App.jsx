@@ -1,10 +1,16 @@
-function App() {
+import { createBrowserRouter, RouterProvider } from "react-router-dom"
+import {  studentRoutes } from "./routes/StudentRoutes"
+import { landingPage } from "./routes/LandingPageRoutes"
+
+const router = createBrowserRouter([
+  landingPage,
+  studentRoutes,
+
+])
+const App = () => {
   return (
-    <div className="container">
-      <h1>Internship Management System</h1>
-      <p>Welcome to IMS</p>
-    </div>
-  );
+    <RouterProvider router={router}/>
+  )
 }
 
-export default App;
+export default App
