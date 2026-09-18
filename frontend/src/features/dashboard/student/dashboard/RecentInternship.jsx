@@ -1,5 +1,7 @@
+import { useNavigate } from "react-router-dom";
 
 export default function RecentInternship() {
+  const navigate = useNavigate()
   return (
     <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
       <div className="flex items-center justify-between mb-6">
@@ -41,7 +43,7 @@ export default function RecentInternship() {
           <button className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all hover:scale-105">
             View Details
           </button>
-          <button className="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors">
+          <button onClick={()=>navigate("/students/reports")} className="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors">
             Submit Report
           </button>
         </div>

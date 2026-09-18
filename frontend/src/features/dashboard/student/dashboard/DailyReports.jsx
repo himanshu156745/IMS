@@ -1,4 +1,7 @@
+import { useNavigate } from "react-router-dom";
+
 export default function DailyReports() {
+  const navigate = useNavigate()
   const reports = [
     { date: 'May 18, 2024', task: 'Completed user authentication module', feedback: 'Excellent work!', status: 'Approved' },
     { date: 'May 17, 2024', task: 'Fixed bugs in payment gateway', feedback: 'Good progress', status: 'Approved' },
@@ -10,7 +13,7 @@ export default function DailyReports() {
     <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-gray-900">Daily Reports</h2>
-        <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all hover:scale-105">
+        <button onClick={()=>navigate("/students/reports")} className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all hover:scale-105">
           Upload Report
         </button>
       </div>

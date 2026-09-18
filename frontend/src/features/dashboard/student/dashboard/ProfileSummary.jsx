@@ -1,4 +1,7 @@
+import { useNavigate } from "react-router-dom";
+
 export default function ProfileSummary() {
+  const navigate = useNavigate()
   const resumeCompletion = 85;
 
   return (
@@ -53,7 +56,7 @@ export default function ProfileSummary() {
         <p className="text-xs text-gray-500 mt-2">Add project details to complete</p>
       </div>
 
-      <button className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all hover:scale-105">
+      <button onClick={()=>navigate("/students/profile")} className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all hover:scale-105">
         Edit Profile
       </button>
     </div>

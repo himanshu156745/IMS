@@ -1,4 +1,7 @@
+import { useNavigate } from "react-router-dom";
+
 export default function AttendanceSection() {
+  const navigate = useNavigate()
   const attendancePercentage = 92;
 
   return (
@@ -58,7 +61,7 @@ export default function AttendanceSection() {
         </div>
       </div>
 
-      <button className="w-full mt-4 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all hover:scale-105">
+      <button onClick={()=>navigate("/students/attendance")} className="w-full mt-4 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all hover:scale-105">
         View Full Report
       </button>
     </div>

@@ -8,7 +8,7 @@ import AttendancePage from "../features/dashboard/student/attendance/AttendanceP
 import Certificates from "../features/dashboard/student/dashboard/Certificates";
 
 export const studentRoutes = {
-    
+
     path: "/students",
     element: <StudentDashboard />,
     children: [
