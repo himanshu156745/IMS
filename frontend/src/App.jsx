@@ -10,8 +10,6 @@ const router = createBrowserRouter([
   studentRoutes,
   adminRoutes,
   facultyRoutes,
-  // companyRoutes,
-  // authRoutes, hrRoutes, mentorRoutes, internRoutes yahi pattern se add honge
 ])
 
 

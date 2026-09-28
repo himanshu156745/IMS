@@ -1,26 +1,31 @@
 
 import { useNavigate } from "react-router-dom";
+import { studentProfile } from "../data/Data";
 
-export default function Sidebar({ 
-  collapsed, 
-  onToggle, 
-  activeTab, 
-  setActiveTab, 
+const hasActiveInternship = studentProfile.hasActiveInternship;
+
+export default function Sidebar({
+  collapsed,
+  onToggle,
+  activeTab,
+  setActiveTab,
   mobileMenuOpen,
-  setMobileMenuOpen  
+  setMobileMenuOpen
 }) {
   const navigate = useNavigate();
 
-  const menuItems = [
+  const baseMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
     { id: 'profile', label: 'My Profile', icon: '👤' },
     { id: 'view-internships', label: 'View Internships', icon: '🔍' },
     { id: 'apply', label: 'Apply Internship', icon: '📄' },
     { id: 'applications', label: 'My Applications', icon: '📂' },
-    { id: 'reports', label: 'Daily Reports', icon: '📝' },
-    { id: 'attendance', label: 'Attendance', icon: '📅' },
     { id: 'certificates', label: 'Certificates', icon: '🎓' },
   ];
+
+  const menuItems = hasActiveInternship
+    ? [...baseMenuItems.slice(0, 5), { id: 'reports', label: 'Daily Reports', icon: '📝' }, { id: 'attendance', label: 'Attendance', icon: '📅' }, ...baseMenuItems.slice(5)]
+    : baseMenuItems;
 
   const handleNavigation = (item) => {
     setActiveTab(item.id);
@@ -48,7 +53,7 @@ export default function Sidebar({
               </span>
             )}
           </div>
-          
+
           {/* Desktop Toggle Button */}
           <button
             onClick={onToggle}
@@ -93,11 +98,10 @@ export default function Sidebar({
           <button
             key={item.id}
             onClick={() => handleNavigation(item)}
-            className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl mb-2 transition-all duration-200 ${
-              activeTab === item.id
+            className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl mb-2 transition-all duration-200 ${activeTab === item.id
                 ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-200'
                 : 'text-gray-700 hover:bg-gray-100'
-            }`}
+              }`}
           >
             <span className="text-xl shrink-0">{item.icon}</span>
             {(!collapsed || mobileMenuOpen) && (

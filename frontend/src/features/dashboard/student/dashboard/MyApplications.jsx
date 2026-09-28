@@ -1,78 +1,106 @@
+import { useState } from 'react';
+
 export default function MyApplications() {
   const applications = [
-    { 
+    {
       id: 1,
-      company: 'Google India', 
+      company: 'Google India',
       logo: 'G',
-      role: 'Software Engineer Intern', 
-      date: 'May 10, 2024', 
+      role: 'Software Engineer Intern',
+      date: 'May 10, 2024',
       status: 'Reviewed',
       location: 'Bangalore',
       stipend: '₹80,000',
+      duration: '6 Months',
       gradient: 'from-red-500 to-orange-500',
-      timeline: ['Applied', 'Reviewed', 'Interview Pending']
+      timeline: ['Applied', 'Reviewed', 'Interview Pending'],
+      description: 'Work with the core engineering team to build and scale distributed systems that power Google products used by billions of users worldwide.',
+      skills: ['Data Structures', 'Algorithms', 'Java', 'System Design'],
+      perks: ['Free Meals', 'Health Insurance', 'Certificate', 'Letter of Recommendation']
     },
-    { 
+    {
       id: 2,
-      company: 'Microsoft', 
+      company: 'Microsoft',
       logo: 'M',
-      role: 'Cloud Developer Intern', 
-      date: 'May 8, 2024', 
+      role: 'Cloud Developer Intern',
+      date: 'May 8, 2024',
       status: 'Selected',
       location: 'Hyderabad',
       stipend: '₹75,000',
+      duration: '3 Months',
       gradient: 'from-blue-500 to-cyan-500',
-      timeline: ['Applied', 'Reviewed', 'Interview', 'Selected']
+      timeline: ['Applied', 'Reviewed', 'Interview', 'Selected'],
+      description: 'Join the Azure team to design, develop and deploy cloud-native applications and services on Microsoft Azure infrastructure.',
+      skills: ['Azure', 'C#', '.NET', 'Kubernetes'],
+      perks: ['Flexible Hours', 'Mentorship', 'Certificate', 'Pre-Placement Offer']
     },
-    { 
+    {
       id: 3,
-      company: 'Amazon', 
+      company: 'Amazon',
       logo: 'A',
-      role: 'Backend Developer', 
-      date: 'May 5, 2024', 
+      role: 'Backend Developer',
+      date: 'May 5, 2024',
       status: 'Pending',
       location: 'Mumbai',
       stipend: '₹70,000',
+      duration: '6 Months',
       gradient: 'from-orange-500 to-amber-500',
-      timeline: ['Applied']
+      timeline: ['Applied'],
+      description: 'Build scalable backend services for Amazon retail platform, working closely with senior SDEs on microservices architecture.',
+      skills: ['Java', 'AWS', 'Microservices', 'SQL'],
+      perks: ['Relocation Assistance', 'Health Insurance', 'Certificate']
     },
-    { 
+    {
       id: 4,
-      company: 'Flipkart', 
+      company: 'Flipkart',
       logo: 'F',
-      role: 'Full Stack Developer', 
-      date: 'May 3, 2024', 
+      role: 'Full Stack Developer',
+      date: 'May 3, 2024',
       status: 'Rejected',
       location: 'Bangalore',
       stipend: '₹50,000',
+      duration: '4 Months',
       gradient: 'from-yellow-500 to-orange-500',
-      timeline: ['Applied', 'Reviewed', 'Rejected']
+      timeline: ['Applied', 'Reviewed', 'Rejected'],
+      description: 'Develop customer-facing features across the Flipkart web platform using React and Node.js in an agile environment.',
+      skills: ['React', 'Node.js', 'MongoDB', 'REST APIs'],
+      perks: ['Flexible Hours', 'Certificate', 'Networking Events']
     },
-    { 
+    {
       id: 5,
-      company: 'TCS', 
+      company: 'TCS',
       logo: 'T',
-      role: 'Full Stack Developer', 
-      date: 'Apr 28, 2024', 
+      role: 'Full Stack Developer',
+      date: 'Apr 28, 2024',
       status: 'Selected',
       location: 'Chennai',
       stipend: '₹25,000',
+      duration: '6 Months',
       gradient: 'from-purple-500 to-pink-500',
-      timeline: ['Applied', 'Reviewed', 'Selected']
+      timeline: ['Applied', 'Reviewed', 'Selected'],
+      description: 'Contribute to enterprise-grade client projects, building and maintaining full stack web applications for global clients.',
+      skills: ['Angular', 'Java', 'Spring Boot', 'MySQL'],
+      perks: ['Certificate', 'Letter of Recommendation', 'Full-Time Offer Chance']
     },
-    { 
+    {
       id: 6,
-      company: 'Infosys', 
+      company: 'Infosys',
       logo: 'I',
-      role: 'Frontend Developer', 
-      date: 'Apr 25, 2024', 
+      role: 'Frontend Developer',
+      date: 'Apr 25, 2024',
       status: 'Reviewed',
       location: 'Bangalore',
       stipend: '₹30,000',
+      duration: '3 Months',
       gradient: 'from-violet-500 to-purple-500',
-      timeline: ['Applied', 'Reviewed']
+      timeline: ['Applied', 'Reviewed'],
+      description: 'Design and implement responsive user interfaces for Infosys internal tools using modern frontend frameworks.',
+      skills: ['React', 'CSS', 'JavaScript', 'Figma'],
+      perks: ['Certificate', 'Training Sessions', 'Networking Events']
     },
   ];
+
+  const [selectedApp, setSelectedApp] = useState(null);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -199,7 +227,10 @@ export default function MyApplications() {
 
                 {/* Actions */}
                 <div className="flex gap-3">
-                  <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all hover:scale-105">
+                  <button
+                    onClick={() => setSelectedApp(app)}
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all hover:scale-105"
+                  >
                     View Details
                   </button>
                   <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors">
@@ -211,6 +242,128 @@ export default function MyApplications() {
           </div>
         ))}
       </div>
+
+      {/* Details Modal */}
+      {selectedApp && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setSelectedApp(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start gap-4 p-6 border-b border-gray-200">
+              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${selectedApp.gradient} flex items-center justify-center text-white text-2xl font-bold shadow-lg flex-shrink-0`}>
+                {selectedApp.logo}
+              </div>
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-gray-900">{selectedApp.role}</h2>
+                <p className="text-gray-600 font-medium">{selectedApp.company}</p>
+              </div>
+              <button
+                onClick={() => setSelectedApp(null)}
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors flex-shrink-0"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
+              {/* Status */}
+              <div className="flex items-center justify-between">
+                <span className={`px-4 py-2 rounded-xl text-sm font-semibold ${getStatusColor(selectedApp.status)}`}>
+                  {selectedApp.status}
+                </span>
+                <span className="text-sm text-gray-500">Applied on {selectedApp.date}</span>
+              </div>
+
+              {/* Quick Info Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-xs text-gray-500 mb-1">Location</p>
+                  <p className="font-semibold text-gray-900">{selectedApp.location}</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-xs text-gray-500 mb-1">Stipend</p>
+                  <p className="font-semibold text-green-600">{selectedApp.stipend}/month</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-xs text-gray-500 mb-1">Duration</p>
+                  <p className="font-semibold text-gray-900">{selectedApp.duration}</p>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <h3 className="text-sm font-bold text-gray-900 mb-2">About the Role</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{selectedApp.description}</p>
+              </div>
+
+              {/* Skills */}
+              <div>
+                <h3 className="text-sm font-bold text-gray-900 mb-2">Skills Required</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedApp.skills.map((skill, index) => (
+                    <span key={index} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Perks */}
+              <div>
+                <h3 className="text-sm font-bold text-gray-900 mb-2">Perks & Benefits</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedApp.perks.map((perk, index) => (
+                    <span key={index} className="px-3 py-1 bg-purple-50 text-purple-700 rounded-lg text-xs font-medium">
+                      {perk}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Timeline */}
+              <div>
+                <h3 className="text-sm font-bold text-gray-900 mb-2">Application Timeline</h3>
+                <div className="flex flex-wrap items-center gap-2">
+                  {selectedApp.timeline.map((step, index) => (
+                    <div key={index} className="flex items-center">
+                      <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium">
+                        {step}
+                      </span>
+                      {index < selectedApp.timeline.length - 1 && (
+                        <svg className="w-4 h-4 text-gray-400 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex gap-3 p-6 border-t border-gray-200">
+              <button
+                onClick={() => setSelectedApp(null)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors"
+              >
+                Close
+              </button>
+              <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all hover:scale-105">
+                Withdraw Application
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
