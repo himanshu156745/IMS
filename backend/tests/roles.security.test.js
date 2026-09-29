@@ -59,12 +59,11 @@ describe('Role-Based Access Control & Security Tests', () => {
             expect(res.status).toBe(200);
         });
 
-        it('should forbid blocked user (BUG: returns 401 instead of 403)', async () => {
+        it('should forbid blocked user', async () => {
             const { cookies } = await setupUser('student', false);
             const res = await request(app).get('/api/v1/users/me').set('Cookie', cookies);
-            // The isActive check throws 403 but the outer catch in verifyJWT re-throws as 401
-            // We assert what it actually does (401) to make the test green, but this IS a bug.
-            expect(res.status).toBe(401);
+            expect(res.status).toBe(403);
+            expect(res.body.message).toMatch(/account is disabled/i);
         });
 
         it('should reject unauthenticated request', async () => {
