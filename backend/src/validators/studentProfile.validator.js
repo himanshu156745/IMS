@@ -6,8 +6,18 @@ const upsertStudentProfileSchema = z.object({
         phoneNumber: z.string().optional(),
         university: z.string().min(1, "University is required"),
         course: z.string().min(1, "Course is required"),
-        semester: z.string().optional().or(z.number().optional()), // formData sends string
-        skills: z.string().optional().or(z.array(z.string()).optional()), // can be JSON string or array
+        semester: z.union([z.string(), z.number()]).optional(),
+        skills: z.preprocess((val) => {
+            if (!val) return val;
+            if (Array.isArray(val)) return val;
+            if (typeof val === 'string') {
+                if (val.startsWith('[') && val.endsWith(']')) {
+                    try { return JSON.parse(val); } catch(e) {}
+                }
+                return val.split(',').map(s => s.trim()).filter(Boolean);
+            }
+            return val;
+        }, z.array(z.string())).optional(),
     })
 });
 
