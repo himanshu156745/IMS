@@ -2,6 +2,7 @@ const User = require('../models/User.model');
 const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const asyncHandler = require('../utils/asyncHandler');
+const { generateToken } = require('../utils/csrf');
 
 // Cookie options for security
 const cookieOptions = {
@@ -86,6 +87,9 @@ const loginUser = asyncHandler(async (req, res) => {
 
     // 5. Generate token
     const token = user.generateAccessToken();
+
+    // Generate CSRF token
+    generateToken(req, res, true); // true generates token AND sets cookie on res
 
     // 6. Remove password from response object
     const loggedInUser = user.toObject();

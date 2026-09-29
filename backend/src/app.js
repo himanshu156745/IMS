@@ -29,11 +29,55 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+const { doubleCsrfProtection } = require('./utils/csrf');
+
 // Express Middlewares
 app.use(express.json({ limit: '16kb' }));
 app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 app.use(express.static('public'));
 app.use(cookieParser());
+
+// Set SameSite=Strict on the auth cookie globally
+app.use((req, res, next) => {
+    const originalCookie = res.cookie;
+    res.cookie = function (name, value, options = {}) {
+        if (name === 'token') {
+            options.sameSite = 'strict';
+        }
+        return originalCookie.call(this, name, value, options);
+    };
+    next();
+});
+
+// CSRF Origin/Referer Check & token validation
+app.use((req, res, next) => {
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+        if (req.path === '/api/v1/users/login' || req.path === '/api/v1/users/register') {
+            return next();
+        }
+        
+        if (process.env.NODE_ENV === 'test') {
+            return next();
+        }
+
+        const origin = req.headers.origin;
+        const referer = req.headers.referer;
+        const allowedOrigins = Array.isArray(process.env.CORS_ORIGIN) 
+            ? process.env.CORS_ORIGIN 
+            : (process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : ['http://localhost:5173', 'http://localhost:5174']);
+        
+        let isValid = false;
+        if (origin && allowedOrigins.some(o => origin.startsWith(o))) isValid = true;
+        if (referer && allowedOrigins.some(o => referer.startsWith(o))) isValid = true;
+        
+        if (!isValid && (origin || referer)) {
+            return res.status(403).json({ success: false, message: "Invalid Origin/Referer" });
+        }
+        
+        return doubleCsrfProtection(req, res, next);
+    }
+    next();
+});
 
 // Routes Imports
 const userRoutes = require('./routes/user.routes');

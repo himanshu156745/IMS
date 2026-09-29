@@ -31,6 +31,11 @@ const errorHandler = (err, req, res, next) => {
         error = new ApiError(400, message);
     }
 
+    // CSRF Error
+    if (err.code === 'EBADCSRFTOKEN') {
+        error = new ApiError(403, 'Invalid CSRF token');
+    }
+
     const statusCode = error.statusCode || 500;
     
     // Do not leak internal error messages for 500s unless in development
