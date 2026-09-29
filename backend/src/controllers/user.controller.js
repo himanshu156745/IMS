@@ -3,6 +3,10 @@ const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const asyncHandler = require('../utils/asyncHandler');
 const { generateToken } = require('../utils/csrf');
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+
+const DUMMY_HASH = bcrypt.hashSync('timing-safe-dummy-password-' + crypto.randomUUID(), 10);
 
 // Cookie options for security
 const cookieOptions = {
@@ -72,9 +76,8 @@ const loginUser = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
     
     // Prevent timing attack: Always compare password even if user is not found
-    const isPasswordValid = await (user 
-        ? user.comparePassword(password)
-        : require('bcrypt').compare(password, "$2b$10$W2jL6bC1U5lO8V.1jD4aY.6eG4qW9dO4zL7yZ3wM8gN1rX9cK5sT2"));
+    const hash = user ? user.password : DUMMY_HASH;
+    const isPasswordValid = await bcrypt.compare(password, hash);
 
     if (!user || !isPasswordValid) {
         throw new ApiError(401, "Invalid credentials");
