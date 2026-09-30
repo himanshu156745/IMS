@@ -16,7 +16,7 @@ const { logAuditEvent } = require('../services/audit.service');
  * @access  Private (student only)
  */
 const markAttendance = asyncHandler(async (req, res) => {
-    const { status, remarks, dateKey: clientDateKey } = req.body;
+    const { status, remarks } = req.body;
     const { internshipId } = req.params;
 
     if (!Object.values(ATTENDANCE_STATUS).includes(status)) {

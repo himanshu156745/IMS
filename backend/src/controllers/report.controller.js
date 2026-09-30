@@ -13,7 +13,7 @@ const { REPORT_STATUS_MAP } = require('../constants/reportStatus');
  * @access  Private (student only)
  */
 const submitReport = asyncHandler(async (req, res) => {
-    const { taskDescription, hoursWorked, dateKey: clientDateKey } = req.body;
+    const { taskDescription, hoursWorked } = req.body;
     const { internshipId } = req.params;
 
     // 1. Verify student is actually accepted into this internship
