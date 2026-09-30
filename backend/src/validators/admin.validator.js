@@ -45,7 +45,7 @@ const updateCompanySchema = z.object({
         location: z.string().optional(),
         industry: z.string().optional(),
         hrName: z.string().optional()
-    })
+    }).passthrough()
 });
 
 module.exports = {
