@@ -101,7 +101,7 @@ const loginUser = asyncHandler(async (req, res) => {
     // 7. Send response with cookie
     return res
         .status(200)
-        .cookie("token", token, cookieOptions)
+        .cookie(process.env.NODE_ENV === 'production' ? '__Host-ims_session' : 'ims_session', token, cookieOptions)
         .json(
             new ApiResponse(200, { user: loggedInUser }, "User logged in successfully")
         );
@@ -115,7 +115,7 @@ const loginUser = asyncHandler(async (req, res) => {
 const logoutUser = asyncHandler(async (req, res) => {
     return res
         .status(200)
-        .clearCookie("token", cookieOptions)
+        .clearCookie(process.env.NODE_ENV === 'production' ? '__Host-ims_session' : 'ims_session', cookieOptions)
         .json(new ApiResponse(200, {}, "User logged out successfully"));
 });
 

@@ -1,7 +1,7 @@
 const { USER_ROLES } = require('../constants/roles');
 const express = require('express');
 const router = express.Router();
-const { verifyJWT, authorizeRoles, requireVerifiedEmail } = require('../middlewares/auth.middleware');
+const { verifyJWT, authorizeRoles } = require('../middlewares/auth.middleware');
 const { issueCertificate, getMyCertificates, verifyCertificate, revokeCertificate } = require('../controllers/certificate.controller');
 const validate = require('../utils/validate.middleware');
 const { issueCertificateSchema, verifyCertificateSchema } = require('../validators/certificate.validator');
@@ -10,7 +10,7 @@ const { issueCertificateSchema, verifyCertificateSchema } = require('../validato
 router.get('/verify/:certificateId', validate(verifyCertificateSchema), verifyCertificate);
 
 // Protected routes
-router.use(verifyJWT, requireVerifiedEmail);
+router.use(verifyJWT);
 
 // Student routes
 router.get('/me', authorizeRoles(USER_ROLES.STUDENT), getMyCertificates);

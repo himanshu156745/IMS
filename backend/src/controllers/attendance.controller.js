@@ -19,7 +19,7 @@ const markAttendance = asyncHandler(async (req, res) => {
     const { status, remarks, dateKey: clientDateKey } = req.body;
     const { internshipId } = req.params;
 
-    if (!ATTENDANCE_STATUS.includes(status)) {
+    if (!Object.values(ATTENDANCE_STATUS).includes(status)) {
         throw new ApiError(400, "Invalid attendance status");
     }
 
@@ -129,7 +129,7 @@ const getInternshipAttendance = asyncHandler(async (req, res) => {
 const updateMyAttendance = asyncHandler(async (req, res) => {
     const { status, remarks } = req.body;
     
-    if (status && !ATTENDANCE_STATUS.includes(status)) {
+    if (status && !Object.values(ATTENDANCE_STATUS).includes(status)) {
         throw new ApiError(400, "Invalid attendance status");
     }
 
@@ -182,7 +182,7 @@ const overrideAttendance = asyncHandler(async (req, res) => {
         }
     }
     
-    if (status && !ATTENDANCE_STATUS.includes(status)) {
+    if (status && !Object.values(ATTENDANCE_STATUS).includes(status)) {
         throw new ApiError(400, "Invalid attendance status");
     }
 

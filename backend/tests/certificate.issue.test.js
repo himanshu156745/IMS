@@ -15,7 +15,7 @@ const { APP_STATUS } = require('../src/constants/applicationStatus');
 
 describe('Certificate issue and revocation (Check 5 & Task 2.16)', () => {
     jest.setTimeout(30000);
-    let mongoServer, faculty, student, facultyToken, internship, application, facultyProfile;
+    let mongoServer, faculty, student, unassignedStudent, facultyToken, internship, application, facultyProfile;
 
     beforeAll(async () => {
         mongoServer = await MongoMemoryServer.create();
@@ -30,6 +30,13 @@ describe('Certificate issue and revocation (Check 5 & Task 2.16)', () => {
 
         student = await User.create({
             email: `student_${Date.now()}@test.com`,
+            password: 'Password123!',
+            role: USER_ROLES.STUDENT,
+            emailVerified: true
+        });
+
+        unassignedStudent = await User.create({
+            email: `unassigned_${Date.now()}@test.com`,
             password: 'Password123!',
             role: USER_ROLES.STUDENT,
             emailVerified: true
@@ -80,6 +87,13 @@ describe('Certificate issue and revocation (Check 5 & Task 2.16)', () => {
             resumeUrl: 'https://cloudinary.com/resume.pdf'
         });
 
+        await Application.create({
+            student: unassignedStudent._id,
+            internship: internship._id,
+            status: APP_STATUS.ACCEPTED,
+            resumeUrl: 'https://cloudinary.com/resume2.pdf'
+        });
+
         facultyToken = faculty.generateAccessToken();
     });
 
@@ -125,5 +139,18 @@ describe('Certificate issue and revocation (Check 5 & Task 2.16)', () => {
         expect(res.statusCode).toBe(200);
         expect(res.body.data.valid).toBe(false);
         expect(res.body.data.revocationReason).toBe('Academic Misconduct');
+    });
+
+    it('Faculty issuing certificate to unassigned student should return 403', async () => {
+        const res = await request(app)
+            .post(`/api/v1/certificates/${internship._id}/issue`)
+            .set('Authorization', `Bearer ${facultyToken}`)
+            .send({
+                studentId: unassignedStudent._id.toString(),
+                certificateUrl: 'https://cloudinary.com/cert.pdf'
+            });
+
+        expect(res.statusCode).toBe(403);
+        expect(res.body.message).toBe("Not authorized to issue certificates for this internship");
     });
 });

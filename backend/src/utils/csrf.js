@@ -12,7 +12,7 @@ const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
     size: 64,
     ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
     getTokenFromRequest: (req) => req.headers['x-csrf-token'],
-    getSessionIdentifier: (req) => req.cookies['__Host-ims_session'] || 'guest-session'
+    getSessionIdentifier: (req) => req.cookies['__Host-ims_session'] || req.cookies['ims_session'] || req.cookies['token'] || 'guest-session'
 });
 
 module.exports = { generateCsrfToken, doubleCsrfProtection };
