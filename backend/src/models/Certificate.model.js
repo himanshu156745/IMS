@@ -37,4 +37,12 @@ const certificateSchema = new mongoose.Schema(
 // A student can only get one certificate per internship
 certificateSchema.index({ student: 1, internship: 1 }, { unique: true });
 
-module.exports = mongoose.model('Certificate', certificateSchema);
+
+    certificateSchema.add({
+        revokedAt: { type: Date },
+        revokedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        revocationReason: { type: String, maxlength: [500, 'Reason too long'] }
+    });
+    
+    module.exports = mongoose.model('Certificate', certificateSchema);
+    
