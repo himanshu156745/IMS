@@ -1,7 +1,7 @@
 const { doubleCsrf } = require('csrf-csrf');
 
-const { generateToken, doubleCsrfProtection } = doubleCsrf({
-    getSecret: () => process.env.CSRF_SECRET || 'super-secret-csrf-key-12345678901234567890',
+const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
+    getSecret: () => process.env.CSRF_SECRET,
     cookieName: 'XSRF-TOKEN',
     cookieOptions: {
         sameSite: 'strict',
@@ -11,7 +11,8 @@ const { generateToken, doubleCsrfProtection } = doubleCsrf({
     },
     size: 64,
     ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
-    getTokenFromRequest: (req) => req.headers['x-csrf-token']
+    getTokenFromRequest: (req) => req.headers['x-csrf-token'],
+    getSessionIdentifier: (req) => req.cookies['__Host-ims_session'] || 'guest-session'
 });
 
-module.exports = { generateToken, doubleCsrfProtection };
+module.exports = { generateCsrfToken, doubleCsrfProtection };
