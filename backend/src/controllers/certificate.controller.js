@@ -7,6 +7,8 @@ const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const asyncHandler = require('../utils/asyncHandler');
 const crypto = require('crypto');
+const { APP_STATUS } = require('../constants/applicationStatus');
+const Company = require('../models/Company.model');
 
 /**
  * @desc    Issue a certificate to a student for an internship
@@ -21,11 +23,12 @@ const issueCertificate = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Student ID and Certificate URL are required");
     }
 
+    
     // Verify application exists and is completed/accepted
     const application = await Application.findOne({
         internship: internshipId,
         student: studentId,
-        status: { $in: ['accepted', 'completed'] }
+        status: APP_STATUS.ACCEPTED
     });
 
     if (!application) {
@@ -53,7 +56,7 @@ const issueCertificate = asyncHandler(async (req, res) => {
                 throw new ApiError(403, "Not authorized to issue certificates for this internship");
             }
             const facultyProfile = await FacultyProfile.findOne({ user: req.user._id });
-            if (!facultyProfile || !facultyProfile.assignedStudents.includes(studentId)) {
+            if (!facultyProfile || !facultyProfile.assignedStudents.some(id => id.toString() === studentId.toString())) {
                 throw new ApiError(403, "Not authorized to issue certificates for this internship");
             }
         }
@@ -63,15 +66,22 @@ const issueCertificate = asyncHandler(async (req, res) => {
     const uniqueHash = crypto.randomBytes(4).toString('hex').toUpperCase();
     const certificateId = `CERT-${new Date().getFullYear()}-${uniqueHash}`;
 
-    const certificate = await Certificate.create({
-        student: studentId,
-        internship: internshipId,
-        issuedBy: req.user._id,
-        certificateUrl,
-        certificateId
-    });
+    try {
+        const certificate = await Certificate.create({
+            student: studentId,
+            internship: internshipId,
+            issuedBy: req.user._id,
+            certificateUrl,
+            certificateId
+        });
 
-    res.status(201).json(new ApiResponse(201, certificate, "Certificate issued successfully"));
+        res.status(201).json(new ApiResponse(201, certificate, "Certificate issued successfully"));
+    } catch (err) {
+        if (err.code === 11000) {
+            throw new ApiError(409, "Certificate already issued");
+        }
+        throw err;
+    }
 });
 
 /**
@@ -80,15 +90,25 @@ const issueCertificate = asyncHandler(async (req, res) => {
  * @access  Private (Student only)
  */
 const getMyCertificates = asyncHandler(async (req, res) => {
-    const certificates = await Certificate.find({ student: req.user._id })
-        .populate('internship', 'title company')
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
+
+    const [certificates, total] = await Promise.all([
+        Certificate.find({ student: req.user._id })
         .populate({
             path: 'internship',
+            select: 'title company',
             populate: { path: 'company', select: 'name logo' }
         })
-        .sort('-issueDate');
-    
-    res.status(200).json(new ApiResponse(200, certificates, "Certificates fetched successfully"));
+        .sort('-issueDate')
+            .skip(skip)
+            .limit(limit),
+        Certificate.countDocuments({ student: req.user._id })
+    ]);
+
+    const meta = { page, limit, total, totalPages: Math.ceil(total / limit) };
+    res.status(200).json(new ApiResponse(200, { data: certificates, meta }, "Certificates fetched successfully"));
 });
 
 /**
@@ -100,28 +120,77 @@ const verifyCertificate = asyncHandler(async (req, res) => {
     const { certificateId } = req.params;
 
     const certificate = await Certificate.findOne({ certificateId })
-        .populate('student', '_id')
+        .populate({
+            path: 'student',
+            select: 'email'
+        })
         .populate({
             path: 'internship',
-            populate: { path: 'company', select: 'name' }
+            select: 'title company -_id',
+            populate: { path: 'company', select: 'name -_id' }
         });
 
     if (!certificate) {
         throw new ApiError(404, "Invalid Certificate ID");
     }
 
-    // Fetch the student profile for their name instead of exposing the email
-    const profile = await StudentProfile.findOne({ user: certificate.student._id }).select('fullName');
+    const profile = await StudentProfile.findOne({ user: certificate.student._id || certificate.student }).select('fullName');
 
-    const result = certificate.toObject();
-    if (profile) {
-        result.studentName = profile.fullName;
+    const responseData = {
+        certificateId: certificate.certificateId,
+        studentName: profile ? profile.fullName : 'Unknown Student',
+        internshipTitle: certificate.internship.title,
+        companyName: certificate.internship.company.name,
+        issueDate: certificate.issueDate,
+        valid: !certificate.revokedAt
+    };
+
+    if (certificate.revokedAt) {
+        responseData.revocationReason = certificate.revocationReason;
     }
 
-    res.status(200).json(new ApiResponse(200, result, "Certificate verified successfully"));
+    res.status(200).json(new ApiResponse(200, responseData, certificate.revokedAt ? "Certificate has been revoked" : "Certificate verified successfully"));
+});
+
+
+/**
+ * @desc    Revoke certificate
+ * @route   POST /api/v1/certificates/:id/revoke
+ * @access  Private (admin/faculty/company)
+ */
+const revokeCertificate = asyncHandler(async (req, res) => {
+    const { revocationReason } = req.body;
+    
+    const certificate = await Certificate.findById(req.params.id).populate('internship');
+    if (!certificate) throw new ApiError(404, "Certificate not found");
+
+    if (certificate.revokedAt) {
+        throw new ApiError(400, "Certificate is already revoked");
+    }
+
+    let authorized = false;
+    if (req.user.role === 'admin') authorized = true;
+    else if (req.user.role === 'faculty' && certificate.internship.mentor?.toString() === req.user._id.toString()) authorized = true;
+    else {
+        const company = await Company.findOne({ user: req.user._id });
+        if (company && certificate.internship.company.toString() === company._id.toString()) authorized = true;
+    }
+
+    if (!authorized) {
+        throw new ApiError(403, "Not authorized to revoke this certificate");
+    }
+
+    certificate.revokedAt = new Date();
+    certificate.revokedBy = req.user._id;
+    certificate.revocationReason = revocationReason;
+    
+    await certificate.save();
+
+    res.status(200).json(new ApiResponse(200, certificate, "Certificate revoked successfully"));
 });
 
 module.exports = {
+    revokeCertificate,
     issueCertificate,
     getMyCertificates,
     verifyCertificate
