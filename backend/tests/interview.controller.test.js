@@ -14,7 +14,7 @@ const { APP_STATUS } = require('../src/constants/applicationStatus');
 
 describe('Interview Controller (Task 2.15)', () => {
     jest.setTimeout(30000);
-    let mongoServer, company, companyB, student, companyToken, companyBToken, studentToken, internship, application;
+    let mongoServer, company, companyB, student, companyToken, companyBToken, studentToken, internship, application, companyProfile, companyBProfile;
 
     beforeAll(async () => {
         mongoServer = await MongoMemoryServer.create();
@@ -41,9 +41,26 @@ describe('Interview Controller (Task 2.15)', () => {
             emailVerified: true
         });
 
+        const Company = require('../src/models/Company.model');
+        companyProfile = await Company.create({
+            user: company._id,
+            name: 'Test Company',
+            hrName: 'HR Test',
+            description: 'Test Desc',
+            location: 'Test Location'
+        });
+
+        companyBProfile = await Company.create({
+            user: companyB._id,
+            name: 'Test Company B',
+            hrName: 'HR Test B',
+            description: 'Test Desc B',
+            location: 'Test Location B'
+        });
+
         internship = await Internship.create({
             title: 'Interview Test Internship',
-            company: company._id,
+            company: companyProfile._id,
             description: 'Test Description',
             location: 'Remote',
             stipend: 1000,

@@ -90,6 +90,7 @@ const attendanceRoutes = require('./routes/attendance.routes');
 const adminRoutes = require('./routes/admin.routes');
 const certificateRoutes = require('./routes/certificate.routes');
 const facultyRoutes = require('./routes/faculty.routes');
+const interviewRoutes = require('./routes/interview.routes');
 
 // Route Declarations
 app.use('/api/v1/users', userRoutes);
@@ -102,6 +103,7 @@ app.use('/api/v1/attendance', attendanceRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/certificates', certificateRoutes);
 app.use('/api/v1/faculty', facultyRoutes);
+app.use('/api/v1/interviews', interviewRoutes);
 
 // Root Route
 app.get('/', (req, res) => {

@@ -47,4 +47,11 @@ const authorizeRoles = (...roles) => {
     };
 };
 
-module.exports = { verifyJWT, authorizeRoles };
+const requireVerifiedEmail = (req, res, next) => {
+    if (!req.user.emailVerified) {
+        return next(new ApiError(403, "Please verify your email."));
+    }
+    next();
+};
+
+module.exports = { verifyJWT, authorizeRoles, requireVerifiedEmail };
