@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../../utils/axiosInstance';
+import { unwrapList } from '../../../../utils/api';
 
 export default function ViewInternships() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -14,8 +15,8 @@ export default function ViewInternships() {
     const fetchInternships = async () => {
       try {
         setLoading(true);
-        const { data } = await axiosInstance.get('/internships');
-        setInternships(data.data);
+        const res = await axiosInstance.get('/internships');
+        setInternships(unwrapList(res));
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch internships');
       } finally {

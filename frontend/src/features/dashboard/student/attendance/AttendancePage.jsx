@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import axiosInstance from '../../../../utils/axiosInstance';
 import { FiCheckCircle, FiXCircle, FiClock, FiCalendar } from 'react-icons/fi';
+import { unwrapList } from '../../../../utils/api';
 
 export default function AttendancePage() {
   const [applications, setApplications] = useState([]);
@@ -13,7 +14,7 @@ export default function AttendancePage() {
   const fetchApplications = async () => {
     try {
       const res = await axiosInstance.get('/applications/me');
-      const accepted = res.data.data.filter(app => app.status === 'accepted');
+      const accepted = unwrapList(res).filter(app => app.status === 'accepted');
       setApplications(accepted);
       if (accepted.length > 0) {
         setSelectedInternshipId(accepted[0].internship._id);
@@ -28,7 +29,7 @@ export default function AttendancePage() {
   const fetchAttendance = useCallback(async () => {
     try {
       const res = await axiosInstance.get(`/attendance/me/${selectedInternshipId}`);
-      setAttendanceRecords(res.data.data);
+      setAttendanceRecords(unwrapList(res));
     } catch {
       toast.error('Failed to fetch attendance records');
     }

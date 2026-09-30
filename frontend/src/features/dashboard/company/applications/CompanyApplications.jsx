@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FileText, Search, Filter } from 'lucide-react';
 import axiosInstance from '../../../../utils/axiosInstance';
+import { unwrapList } from '../../../../utils/api';
 
 export default function CompanyApplications() {
     const [, setApplications] = useState([]);

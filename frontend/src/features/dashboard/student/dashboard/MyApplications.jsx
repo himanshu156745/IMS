@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../../utils/axiosInstance';
+import { unwrapList } from '../../../../utils/api';
 
 export default function MyApplications() {
   const [applications, setApplications] = useState([]);
@@ -12,8 +13,8 @@ export default function MyApplications() {
     const fetchApplications = async () => {
       try {
         setLoading(true);
-        const { data } = await axiosInstance.get('/applications/me');
-        setApplications(data.data);
+        const res = await axiosInstance.get('/applications/me');
+        setApplications(unwrapList(res));
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch applications');
       } finally {

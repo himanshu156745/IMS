@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import axiosInstance from '../../../../utils/axiosInstance';
 import { FiDownload, FiExternalLink, FiAward, FiCheckCircle, FiClock, FiShield } from 'react-icons/fi';
+import { unwrapList } from '../../../../utils/api';
 
 export default function Certificates() {
   const [certificates, setCertificates] = useState([]);
@@ -10,7 +11,7 @@ export default function Certificates() {
   const fetchCertificates = async () => {
     try {
       const res = await axiosInstance.get('/certificates/me');
-      setCertificates(res.data.data);
+      setCertificates(unwrapList(res));
     } catch {
       toast.error('Failed to fetch certificates');
     } finally {

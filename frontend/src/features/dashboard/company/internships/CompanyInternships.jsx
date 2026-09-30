@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, MapPin, Calendar, Users, Edit3, Trash2 } from 'lucide-react';
 import axiosInstance from '../../../../utils/axiosInstance';
 import PostInternshipModal from './components/PostInternshipModal';
+import { unwrapList } from '../../../../utils/api';
 
 export default function CompanyInternships() {
     const [internships, setInternships] = useState([]);

@@ -1,4 +1,5 @@
 import api from "../../../../utils/axiosInstance";
+import { unwrapList } from '../../../../utils/api';
 
 export const facultyService = {
   getProfile: async () => {
@@ -18,6 +19,6 @@ export const facultyService = {
 
   getMyStudents: async () => {
     const response = await api.get("/faculty/students");
-    return response.data;
+    return unwrapList(response);
   }
 };
