@@ -4,6 +4,8 @@ const Application = require('../models/Application.model');
 const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const asyncHandler = require('../utils/asyncHandler');
+const { APP_STATUS } = require('../constants/applicationStatus');
+const { REPORT_STATUS_MAP } = require('../constants/reportStatus');
 
 /**
  * @desc    Submit a daily report
@@ -11,14 +13,14 @@ const asyncHandler = require('../utils/asyncHandler');
  * @access  Private (student only)
  */
 const submitReport = asyncHandler(async (req, res) => {
-    const { taskDescription, hoursWorked } = req.body;
+    const { taskDescription, hoursWorked, dateKey: clientDateKey } = req.body;
     const { internshipId } = req.params;
 
     // 1. Verify student is actually accepted into this internship
     const application = await Application.findOne({ 
         internship: internshipId, 
         student: req.user._id,
-        status: 'accepted'
+        status: APP_STATUS.ACCEPTED
     });
 
     if (!application) {
@@ -26,8 +28,8 @@ const submitReport = asyncHandler(async (req, res) => {
     }
 
     // 2. Prevent duplicate report for the same day
-    const dateStr = new Date().toLocaleDateString('en-CA'); // 'en-CA' gives YYYY-MM-DD
-    const dateKey = dateStr;
+    const { generateDateKey } = require('../utils/dateUtils');
+    const dateKey = generateDateKey(new Date());
 
     const existingReport = await Report.findOne({
         student: req.user._id,
@@ -56,12 +58,34 @@ const submitReport = asyncHandler(async (req, res) => {
  * @access  Private (student only)
  */
 const getMyReports = asyncHandler(async (req, res) => {
-    const reports = await Report.find({ 
-        student: req.user._id, 
-        internship: req.params.internshipId 
-    }).sort('-date');
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
+
+    const { from, to } = req.query;
+    let query = { student: req.user._id, internship: req.params.internshipId };
     
-    res.status(200).json(new ApiResponse(200, reports, "Reports fetched successfully"));
+    if (from || to) {
+        query.dateKey = {};
+        if (from) {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(from)) throw new ApiError(400, "Invalid 'from' date format (YYYY-MM-DD)");
+            query.dateKey.$gte = from;
+        }
+        if (to) {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(to)) throw new ApiError(400, "Invalid 'to' date format (YYYY-MM-DD)");
+            query.dateKey.$lte = to;
+        }
+    }
+
+    const [reports, total] = await Promise.all([
+        Report.find(query).sort('-date')
+            .skip(skip)
+            .limit(limit),
+        Report.countDocuments(query)
+    ]);
+
+    const meta = { page, limit, total, totalPages: Math.ceil(total / limit) };
+    res.status(200).json(new ApiResponse(200, { data: reports, meta }, "Reports fetched successfully"));
 });
 
 /**
@@ -77,11 +101,36 @@ const getInternshipReportsForEvaluation = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You can only view reports for internships you mentor");
     }
 
-    const reports = await Report.find({ internship: req.params.internshipId })
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
+
+    const { from, to } = req.query;
+    let query = { internship: req.params.internshipId };
+    
+    if (from || to) {
+        query.dateKey = {};
+        if (from) {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(from)) throw new ApiError(400, "Invalid 'from' date format (YYYY-MM-DD)");
+            query.dateKey.$gte = from;
+        }
+        if (to) {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(to)) throw new ApiError(400, "Invalid 'to' date format (YYYY-MM-DD)");
+            query.dateKey.$lte = to;
+        }
+    }
+
+    const [reports, total] = await Promise.all([
+        Report.find(query)
         .populate('student', 'email')
-        .sort('-date');
-        
-    res.status(200).json(new ApiResponse(200, reports, "Reports fetched successfully"));
+        .sort('-date')
+            .skip(skip)
+            .limit(limit),
+        Report.countDocuments(query)
+    ]);
+
+    const meta = { page, limit, total, totalPages: Math.ceil(total / limit) };
+    res.status(200).json(new ApiResponse(200, { data: reports, meta }, "Reports fetched successfully"));
 });
 
 /**
@@ -92,7 +141,7 @@ const getInternshipReportsForEvaluation = asyncHandler(async (req, res) => {
 const evaluateReport = asyncHandler(async (req, res) => {
     const { status, facultyFeedback } = req.body;
     
-    if (!['approved', 'rejected'].includes(status)) {
+    if (![REPORT_STATUS_MAP.APPROVED, REPORT_STATUS_MAP.REJECTED].includes(status)) {
         throw new ApiError(400, "Invalid status. Must be approved or rejected");
     }
 

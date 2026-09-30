@@ -7,8 +7,7 @@ const submitReportSchema = z.object({
     }),
     body: z.object({
         taskDescription: z.string().min(20, "Please provide a detailed description (min 20 characters)").max(2000, "Description is too long"),
-        hoursWorked: z.number().min(1, "Hours worked must be at least 1").max(12, "Hours worked cannot exceed 12 per day").or(z.string().regex(/^\d+(\.\d+)?$/, "Must be a valid number").transform(Number).refine(n => n >= 1 && n <= 12, { message: "Hours must be between 1 and 12" })),
-        dateKey: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid dateKey format. Expected YYYY-MM-DD").optional()
+        hoursWorked: z.number().min(1, "Hours worked must be at least 1").max(12, "Hours worked cannot exceed 12 per day").or(z.string().regex(/^\d+(\.\d+)?$/, "Must be a valid number").transform(Number).refine(n => n >= 1 && n <= 12, { message: "Hours must be between 1 and 12" }))
     })
 });
 
