@@ -2,9 +2,13 @@ const User = require('../models/User.model');
 const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const asyncHandler = require('../utils/asyncHandler');
-const { generateToken } = require('../utils/csrf');
+const { generateCsrfToken } = require('../utils/csrf');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+
+const IS_PROD = process.env.NODE_ENV === 'production';
+const ACCESS_COOKIE_NAME = IS_PROD ? '__Host-ims_session' : 'ims_session';
+const REFRESH_COOKIE_NAME = IS_PROD ? '__Host-ims_refresh' : 'ims_refresh';
 
 const DUMMY_HASH = bcrypt.hashSync('timing-safe-dummy-password-' + crypto.randomUUID(), 10);
 
@@ -92,7 +96,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const token = user.generateAccessToken();
 
     // Generate CSRF token
-    generateToken(req, res, true); // true generates token AND sets cookie on res
+    generateCsrfToken(req, res, true); // true generates token AND sets cookie on res
 
     // 6. Remove password from response object
     const loggedInUser = user.toObject();
@@ -101,7 +105,7 @@ const loginUser = asyncHandler(async (req, res) => {
     // 7. Send response with cookie
     return res
         .status(200)
-        .cookie(process.env.NODE_ENV === 'production' ? '__Host-ims_session' : 'ims_session', token, cookieOptions)
+        .cookie(ACCESS_COOKIE_NAME, token, cookieOptions)
         .json(
             new ApiResponse(200, { user: loggedInUser }, "User logged in successfully")
         );
@@ -115,7 +119,7 @@ const loginUser = asyncHandler(async (req, res) => {
 const logoutUser = asyncHandler(async (req, res) => {
     return res
         .status(200)
-        .clearCookie(process.env.NODE_ENV === 'production' ? '__Host-ims_session' : 'ims_session', cookieOptions)
+        .clearCookie(ACCESS_COOKIE_NAME, cookieOptions)
         .json(new ApiResponse(200, {}, "User logged out successfully"));
 });
 

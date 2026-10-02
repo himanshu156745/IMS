@@ -3,10 +3,14 @@ const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
 const User = require('../models/User.model');
 
+const IS_PROD = process.env.NODE_ENV === 'production';
+const ACCESS_COOKIE_NAME = IS_PROD ? '__Host-ims_session' : 'ims_session';
+const REFRESH_COOKIE_NAME = IS_PROD ? '__Host-ims_refresh' : 'ims_refresh';
+
 const verifyJWT = asyncHandler(async (req, res, next) => {
     try {
         // 1. Get token from cookies OR Authorization header (Bearer token)
-        const token = req.cookies?.['__Host-ims_session'] || req.cookies?.ims_session || req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+        const token = req.cookies?.['__Host-ims_session'] || req.cookies?.['ims_session'] || req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
 
         if (!token) {
             throw new ApiError(401, "Unauthorized request - Token missing");

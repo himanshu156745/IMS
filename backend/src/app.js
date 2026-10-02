@@ -37,46 +37,46 @@ app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 app.use(express.static('public'));
 app.use(cookieParser());
 
-// Set SameSite=Strict on the auth cookie globally
-app.use((req, res, next) => {
-    const originalCookie = res.cookie;
-    res.cookie = function (name, value, options = {}) {
-        if (name === 'token') {
-            options.sameSite = 'strict';
-        }
-        return originalCookie.call(this, name, value, options);
-    };
-    next();
-});
+const CSRF_EXEMPT_PREFIXES = [
+    '/api/v1/users/login',
+    '/api/v1/users/register',
+    '/api/v1/users/forgot-password',
+    '/api/v1/users/reset-password',
+    '/api/v1/users/verify-email',
+    '/api/v1/invite',
+];
 
-// CSRF Origin/Referer Check & token validation
-app.use((req, res, next) => {
-    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
-        if (req.path === '/api/v1/users/login' || req.path === '/api/v1/users/register') {
-            return next();
-        }
-        
-        if (process.env.NODE_ENV === 'test') {
-            return next();
-        }
+const isCsrfExempt = (path) =>
+    CSRF_EXEMPT_PREFIXES.some((p) => path === p || path.startsWith(p + '/'));
 
-        const origin = req.headers.origin;
-        const referer = req.headers.referer;
-        const allowedOrigins = Array.isArray(process.env.CORS_ORIGIN) 
-            ? process.env.CORS_ORIGIN 
-            : (process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : ['http://localhost:5173', 'http://localhost:5174']);
-        
-        let isValid = false;
-        if (origin && allowedOrigins.some(o => origin.startsWith(o))) isValid = true;
-        if (referer && allowedOrigins.some(o => referer.startsWith(o))) isValid = true;
-        
-        if (!isValid && (origin || referer)) {
-            return res.status(403).json({ success: false, message: "Invalid Origin/Referer" });
-        }
-        
-        return doubleCsrfProtection(req, res, next);
+const normalizeOrigin = (u) => { try { return new URL(u).origin; } catch { return null; } };
+
+app.use((req, res, next) => {
+    if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) return next();
+    if (isCsrfExempt(req.path)) return next();
+
+    const rawOrigins = process.env.CORS_ORIGIN;
+    const list = Array.isArray(rawOrigins)
+        ? rawOrigins
+        : (rawOrigins ? rawOrigins.split(',').map(s => s.trim()) : []);
+    const fallback = ['http://localhost:5173', 'http://localhost:5174'];
+    const allowed = new Set([...list, ...fallback].map(normalizeOrigin).filter(Boolean));
+
+    const originOrigin = normalizeOrigin(req.headers.origin);
+    const refererOrigin = req.headers.referer ? normalizeOrigin(req.headers.referer) : null;
+    const hasOriginInfo = Boolean(originOrigin || refererOrigin);
+    const ok = (originOrigin && allowed.has(originOrigin))
+            || (refererOrigin && allowed.has(refererOrigin));
+
+    if (hasOriginInfo && !ok) {
+        return res.status(403).json({ success: false, message: "Invalid Origin/Referer" });
     }
-    next();
+
+    if (process.env.NODE_ENV === 'test') {
+        return next();
+    }
+
+    return doubleCsrfProtection(req, res, next);
 });
 
 // Routes Imports
@@ -91,7 +91,8 @@ const adminRoutes = require('./routes/admin.routes');
 const certificateRoutes = require('./routes/certificate.routes');
 const facultyRoutes = require('./routes/faculty.routes');
 const interviewRoutes = require('./routes/interview.routes');
-
+const inviteRoutes = require('./routes/invite.routes');
+const notificationRoutes = require('./routes/notification.routes');
 // Route Declarations
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/companies', companyRoutes);
@@ -104,7 +105,8 @@ app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/certificates', certificateRoutes);
 app.use('/api/v1/faculty', facultyRoutes);
 app.use('/api/v1/interviews', interviewRoutes);
-
+app.use('/api/v1/invite', inviteRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 // Root Route
 app.get('/', (req, res) => {
     res.status(200).json({ success: true, message: "IMS API is running securely" });

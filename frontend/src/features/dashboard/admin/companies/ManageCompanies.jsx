@@ -15,9 +15,10 @@ import NotificationPanel from "./components/NotificationPanel";
 import ActivityTimeline from "../../../../components/ui/ActivityTimeline";
 import axiosInstance from "../../../../utils/axiosInstance";
 import { toast } from "react-hot-toast";
+import { unwrapList } from '../../../../utils/api';
 
 import {
-import { unwrapList } from '../../../../utils/api';
+
   notifications,
   activities,
 } from "./data/companiesData";
@@ -33,24 +34,7 @@ const DEFAULT_FILTERS = {
   sort: "name-asc",
 };
 
-/**
- * NOTE ON SHARED COMPONENTS
- * -------------------------
- * Matches the real shared component APIs from src/components/ui:
- *   - PageHeader    : { title, subtitle, actions }
- *   - StatCard      : { label, value, sub, status: "onTrack"|"attention"|"overdue"|"neutral", trend }
- *   - Table         : { columns: [{ key, label, render(row) }], rows, emptyText }
- *   - Pagination    : { page, totalPages, onPageChange }
- *   - DropdownMenu  : { items: [{ label, Icon, onClick, danger? }] } (renders its own trigger)
- *   - Badge         : { variant: "onTrack"|"attention"|"overdue"|"neutral", children }
- *   - EmptyState    : { onCreateClick } — copy is hardcoded ("No Internships Found") in
- *                      the shared component itself, so it will show that text everywhere
- *                      it's used in this feature too. Update EmptyState.jsx to accept a
- *                      title/description prop if you want context-specific empty copy.
- *   - SkeletonLoader: named exports StatCardSkeleton / TableRowSkeleton / ExpandedDetailsSkeleton
- * All feature-specific logic (filtering, sorting, CRUD on dummy data)
- * lives in this file via useState/useMemo — no Redux, no Context, no API.
- */
+
 export default function ManageCompanies() {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);

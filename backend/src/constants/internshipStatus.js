@@ -1,0 +1,3 @@
+const INTERNSHIP_STATUS_MAP = { OPEN: 'open', CLOSED: 'closed' };
+const INTERNSHIP_STATUS = Object.values(INTERNSHIP_STATUS_MAP);
+module.exports = { INTERNSHIP_STATUS_MAP, INTERNSHIP_STATUS };

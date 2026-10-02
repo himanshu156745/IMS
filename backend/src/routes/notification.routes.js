@@ -1,0 +1,10 @@
+const express = require('express');
+const { verifyJWT, requireVerifiedEmail } = require('../middlewares/auth.middleware');
+const { getNotifications, markAsRead, markAllAsRead, getUnreadCount } = require('../controllers/notification.controller');
+const router = express.Router();
+router.use(verifyJWT, requireVerifiedEmail);
+router.get('/', getNotifications);
+router.get('/unread-count', getUnreadCount);
+router.patch('/read-all', markAllAsRead);
+router.patch('/:id/read', markAsRead);
+module.exports = router;
