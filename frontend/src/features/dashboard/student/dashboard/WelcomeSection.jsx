@@ -1,7 +1,14 @@
 import { useNavigate } from "react-router-dom";
 
-export default function WelcomeSection() {
+export default function WelcomeSection({ user }) {
   const navigate = useNavigate();
+  
+  let displayName = "";
+  if (user && user.email) {
+    const prefix = user.email.split('@')[0];
+    displayName = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+  }
+
   return (
     <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 lg:p-12 mb-6 shadow-xl overflow-hidden relative">
       {/* Background pattern */}
@@ -14,7 +21,7 @@ export default function WelcomeSection() {
         {/* Text Content */}
         <div>
           <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
-            Welcome Back, Student 👋
+            Welcome Back{displayName ? `, ${displayName}` : ""} 👋
           </h1>
           <p className="text-lg text-blue-100 leading-relaxed">
             Track your internships, attendance, reports, and applications from one place.

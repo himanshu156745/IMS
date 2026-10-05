@@ -1,10 +1,9 @@
-
-export default function QuickStats() {
+export default function QuickStats({ applications = [], certificates = [] }) {
   const stats = [
     {
       title: 'Applications Submitted',
-      value: '12',
-      trend: '+2 this week',
+      value: applications?.length || 0,
+      trend: '',
       trendUp: true,
       gradient: 'from-blue-500 to-cyan-500',
       icon: (
@@ -15,8 +14,8 @@ export default function QuickStats() {
     },
     {
       title: 'Attendance',
-      value: '92%',
-      trend: '+3% from last month',
+      value: '—',
+      trend: '',
       trendUp: true,
       gradient: 'from-purple-500 to-pink-500',
       icon: (
@@ -27,8 +26,8 @@ export default function QuickStats() {
     },
     {
       title: 'Reports Submitted',
-      value: '18',
-      trend: '2 pending review',
+      value: '—',
+      trend: '',
       trendUp: false,
       gradient: 'from-violet-500 to-purple-500',
       icon: (
@@ -39,8 +38,8 @@ export default function QuickStats() {
     },
     {
       title: 'Certificates Earned',
-      value: '3',
-      trend: '1 in progress',
+      value: certificates?.length || 0,
+      trend: '',
       trendUp: true,
       gradient: 'from-indigo-500 to-blue-500',
       icon: (
@@ -71,7 +70,7 @@ export default function QuickStats() {
           <div>
             <h3 className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</h3>
             <p className="text-sm font-medium text-gray-600 mb-2">{stat.title}</p>
-            <p className="text-xs text-gray-500">{stat.trend}</p>
+            {stat.trend && <p className="text-xs text-gray-500">{stat.trend}</p>}
           </div>
         </div>
       ))}

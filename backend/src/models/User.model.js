@@ -37,9 +37,16 @@ const userSchema = new mongoose.Schema(
         emailVerified: {
             type: Boolean,
             default: false
+        },
+        emailVerifiedAt: {
+            type: Date
+        },
+        tokenVersion: {
+            type: Number,
+            default: 0
         }
     },
-    { 
+    {
         timestamps: true,
         toJSON: {
             transform: function (doc, ret) {
@@ -68,7 +75,7 @@ userSchema.methods.generateAccessToken = function () {
     return jwt.sign(
         { id: this._id, role: this.role, email: this.email },
         process.env.JWT_SECRET,
-        { 
+        {
             expiresIn: process.env.JWT_EXPIRES_IN || '1d',
             algorithm: 'HS256'
         }

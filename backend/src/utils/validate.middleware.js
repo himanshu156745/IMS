@@ -9,8 +9,8 @@ const validate = (schema) => (req, res, next) => {
             params: req.params,
         });
         if (parsed.body) req.body = parsed.body;
-        if (parsed.query) req.query = parsed.query;
-        if (parsed.params) req.params = parsed.params;
+        if (parsed.query) Object.defineProperty(req, 'query', { value: parsed.query, writable: true, configurable: true });
+        if (parsed.params) Object.defineProperty(req, 'params', { value: parsed.params, writable: true, configurable: true });
         next();
     } catch (err) {
         if (err instanceof z.ZodError) {

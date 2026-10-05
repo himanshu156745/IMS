@@ -12,12 +12,17 @@ const upsertStudentProfileSchema = z.object({
             if (Array.isArray(val)) return val;
             if (typeof val === 'string') {
                 if (val.startsWith('[') && val.endsWith(']')) {
-                    try { return JSON.parse(val); } catch(e) {}
+                    try { return JSON.parse(val); } catch (e) { }
                 }
                 return val.split(',').map(s => s.trim()).filter(Boolean);
             }
             return val;
         }, z.array(z.string())).optional(),
+        branch: z.string().optional(),
+        cgpa: z.coerce.number().min(0).max(10).optional(),
+        github: z.string().url().optional().or(z.literal('')),
+        linkedin: z.string().url().optional().or(z.literal('')),
+        portfolio: z.string().url().optional().or(z.literal('')),
     })
 });
 

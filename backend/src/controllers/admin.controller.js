@@ -55,13 +55,13 @@ const getAllUsers = asyncHandler(async (req, res) => {
  */
 const toggleUserStatus = asyncHandler(async (req, res) => {
     const { isActive } = req.body;
-    
+
     if (typeof isActive !== 'boolean') {
         throw new ApiError(400, "isActive must be a boolean");
     }
 
     const user = await User.findByIdAndUpdate(
-        req.params.id, 
+        req.params.id,
         { isActive },
         { new: true }
     ).select('-password');
@@ -105,7 +105,7 @@ const deleteUser = asyncHandler(async (req, res) => {
  */
 const inviteUser = asyncHandler(async (req, res) => {
     const { email, role } = req.body;
-    
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
         throw new ApiError(400, "User with this email already exists");
@@ -163,11 +163,10 @@ const getAllCompanies = asyncHandler(async (req, res) => {
  */
 const updateCompanyVerification = asyncHandler(async (req, res) => {
     const { verificationStatus } = req.body;
-    
-    if (!COMPANY_VERIFICATION.includes(verificationStatus)) {
+
+    if (!Object.values(COMPANY_VERIFICATION).includes(verificationStatus)) {
         throw new ApiError(400, "Invalid verification status");
     }
-
     const company = await Company.findByIdAndUpdate(
         req.params.id,
         { verificationStatus },
@@ -189,7 +188,7 @@ const updateCompanyVerification = asyncHandler(async (req, res) => {
 const deleteCompany = asyncHandler(async (req, res) => {
     const company = await Company.findById(req.params.id);
     if (!company) throw new ApiError(404, "Company not found");
-    
+
     await Company.findByIdAndDelete(req.params.id);
     // Soft-delete the associated user
     const user = await User.findByIdAndUpdate(

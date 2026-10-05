@@ -11,16 +11,10 @@ const User = require('../models/User.model');
  */
 const getMyProfile = asyncHandler(async (req, res) => {
     let profile = await FacultyProfile.findOne({ user: req.user._id }).populate('assignedStudents', 'email');
-    
+
     // Create an empty profile if not found
     if (!profile) {
-        profile = await FacultyProfile.create({
-            user: req.user._id,
-            fullName: 'Faculty User', // placeholder
-            department: 'Computer Science',
-            designation: 'Professor',
-            employeeId: `EMP-${Date.now()}`
-        });
+        throw new ApiError(404, "Profile not found. Please create one.");
     }
 
     res.status(200).json(new ApiResponse(200, profile, "Profile fetched successfully"));
@@ -33,7 +27,7 @@ const getMyProfile = asyncHandler(async (req, res) => {
  */
 const updateMyProfile = asyncHandler(async (req, res) => {
     const { fullName, department, designation, phoneNumber } = req.body;
-    
+
     let profile = await FacultyProfile.findOne({ user: req.user._id });
     if (!profile) {
         throw new ApiError(404, "Profile not found");
@@ -43,7 +37,7 @@ const updateMyProfile = asyncHandler(async (req, res) => {
     if (department) profile.department = department;
     if (designation) profile.designation = designation;
     if (phoneNumber) profile.phoneNumber = phoneNumber;
-    
+
     if (req.file) {
         // Mocking upload for now
         profile.avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullName)}`;
@@ -91,7 +85,7 @@ const getDashboardStats = asyncHandler(async (req, res) => {
             avgAttendance = Math.round((presentAttendance / totalAttendance) * 100);
         }
     }
-    
+
     res.status(200).json(new ApiResponse(200, {
         totalStudents,
         activeInternships,
@@ -107,7 +101,7 @@ const getDashboardStats = asyncHandler(async (req, res) => {
  */
 const getMyStudents = asyncHandler(async (req, res) => {
     const profile = await FacultyProfile.findOne({ user: req.user._id });
-    
+
     if (!profile || !profile.assignedStudents || profile.assignedStudents.length === 0) {
         return res.status(200).json(new ApiResponse(200, [], "Students fetched successfully"));
     }
