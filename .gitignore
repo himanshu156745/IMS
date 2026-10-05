@@ -8,3 +8,6 @@ backend/test_output.log
 *.log
 extract_code.js
 fix_unwrap.js
+cookies.txt
+login_response.json
+body.json
