@@ -1,32 +1,35 @@
 import { NavLink } from "react-router-dom";
 import {
   LayoutGrid,
-  GraduationCap,
-  Building2,
-  UserCog,
   Briefcase,
   FileText,
-  BarChart3,
+  Users,
   Settings,
   LogOut,
   X,
 } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const NAV_ITEMS = [
-  { to: "/admin", label: "Dashboard", Icon: LayoutGrid, end: true },
-  { to: "/admin/students", label: "Manage Student", Icon: GraduationCap },
-  { to: "/admin/companies", label: "Manage Companies", Icon: Building2 },
-  { to: "/admin/faculty", label: "Manage Faculty", Icon: UserCog },
-  { to: "/admin/internships", label: "Manage Internship", Icon: Briefcase },
-  { to: "/admin/applications", label: "View Applications", Icon: FileText },
-  { to: "/admin/reports", label: "Report & Analytics", Icon: BarChart3 },
-  { to: "/admin/settings", label: "Setting", Icon: Settings },
+  { to: "/company", label: "Dashboard", Icon: LayoutGrid, end: true },
+  { to: "/company/internships", label: "My Internships", Icon: Briefcase },
+  { to: "/company/applications", label: "Applications", Icon: FileText },
+  { to: "/company/profile", label: "Company Profile", Icon: Users },
+  { to: "/company/settings", label: "Settings", Icon: Settings },
 ];
 
-export default function Sidebar({ isOpen, onClose }) {
-  const handleLogout = () => {
-    // TODO: clear auth token/session + redirect to /login once auth module is wired
-    console.log("logout clicked");
+export default function CompanySidebar({ isOpen, onClose }) {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch {
+      navigate("/login");
+    }
   };
 
   return (
@@ -38,25 +41,21 @@ export default function Sidebar({ isOpen, onClose }) {
         />
       )}
 
-      {/* <aside
-        className={`fixed z-40 flex h-full w-72 flex-col bg-ink px-4 py-6 transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0
-        ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
-      > */}
       <aside
         className={`fixed z-40 flex h-full w-72 shrink-0 flex-col bg-ink px-4 py-6 transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0
   ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="mb-8 flex items-center justify-between px-2">
           <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-lg font-bold text-white">
-              A
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-lg font-bold text-white">
+              C
             </div>
             <div>
               <p className="text-lg font-bold leading-none text-white">
-                RID Tech
+                IMS
               </p>
               <p className="text-xs font-medium text-slate-400">
-                Admin Console
+                Company Portal
               </p>
             </div>
           </div>

@@ -10,7 +10,7 @@ const logFormat = format.combine(
     format: 'DD-MM-YYYY HH:mm:ss'
   }),
   format.errors({ stack: true }),
-  format.json()
+  format.json() 
 );
 
 // Logger
