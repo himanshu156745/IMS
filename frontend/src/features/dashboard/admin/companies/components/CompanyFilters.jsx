@@ -1,5 +1,4 @@
 // src/features/dashboard/admin/companies/components/CompanyFilters.jsx
-import React from "react";
 import { FiSearch, FiChevronDown } from "react-icons/fi";
 import {
   industryOptions,

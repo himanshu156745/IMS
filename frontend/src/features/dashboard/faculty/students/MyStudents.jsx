@@ -1,16 +1,45 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import toast from "react-hot-toast";
 import SearchBar from "../components/SearchBar";
 import StudentTable from "../components/StudentTable";
-import { students, departments, batches, statusOptions } from "../data/students.service";
+import { facultyService } from "../services/faculty.service";
 
 const PAGE_SIZE = 5;
+const departments = ["All", "B.Tech", "MCA", "BBA", "BCA"];
+const statusOptions = ["All", "Ongoing", "Completed", "Pending"];
 
 export default function MyStudents() {
   const [query, setQuery] = useState("");
   const [department, setDepartment] = useState("All");
-  const [batch, setBatch] = useState("All");
   const [status, setStatus] = useState("All");
   const [page, setPage] = useState(1);
+  const [students, setStudents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const res = await facultyService.getMyStudents();
+        const formattedStudents = res.data.map(profile => ({
+          id: profile.user._id || profile.user,
+          name: profile.fullName || "Unknown",
+          photo: profile.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullName || 'U')}`,
+          department: profile.course || "N/A",
+          enrollment: profile.user.email ? profile.user.email.split('@')[0] : "N/A",
+          company: "Unassigned", // To be fetched from their active application
+          role: "Intern",
+          status: "Pending", // Mock for now
+          progress: 0 // Mock for now
+        }));
+        setStudents(formattedStudents);
+      } catch {
+        toast.error("Failed to fetch students");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchStudents();
+  }, []);
 
   const filtered = useMemo(() => {
     return students.filter((s) => {
@@ -18,11 +47,10 @@ export default function MyStudents() {
         s.name.toLowerCase().includes(query.toLowerCase()) ||
         s.enrollment.toLowerCase().includes(query.toLowerCase());
       const matchesDept = department === "All" || s.department === department;
-      const matchesBatch = batch === "All" || s.batch === batch;
       const matchesStatus = status === "All" || s.status === status;
-      return matchesQuery && matchesDept && matchesBatch && matchesStatus;
+      return matchesQuery && matchesDept && matchesStatus;
     });
-  }, [query, department, batch, status]);
+  }, [query, department, status, students]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -30,6 +58,10 @@ export default function MyStudents() {
   function updateFilter(setter, value) {
     setter(value);
     setPage(1);
+  }
+
+  if (isLoading) {
+    return <div className="p-8 text-center text-slate-500">Loading students...</div>;
   }
 
   return (
@@ -42,7 +74,7 @@ export default function MyStudents() {
               setQuery(v);
               setPage(1);
             }}
-            placeholder="Search by name or enrollment no."
+            placeholder="Search by name or email prefix."
             className="sm:w-80"
           />
 
@@ -53,16 +85,7 @@ export default function MyStudents() {
               className="input-field w-auto py-2"
             >
               {departments.map((d) => (
-                <option key={d} value={d}>{d === "All" ? "All Departments" : d}</option>
-              ))}
-            </select>
-            <select
-              value={batch}
-              onChange={(e) => updateFilter(setBatch, e.target.value)}
-              className="input-field w-auto py-2"
-            >
-              {batches.map((b) => (
-                <option key={b} value={b}>{b === "All" ? "All Batches" : `Batch ${b}`}</option>
+                <option key={d} value={d}>{d === "All" ? "All Courses" : d}</option>
               ))}
             </select>
             <select

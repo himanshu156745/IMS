@@ -1,7 +1,7 @@
 import { FileText } from "lucide-react";
 import Table from "../../../../../components/ui/Table";
 import { TableRowSkeleton } from "../../../../../components/ui/SkeletonLoader";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "../../../../../components/ui/StatusBadge";
 import PriorityBadge from "./PriorityBadge";
 import SkillMatchCard from "./SkillMatchCard";
 import ActionDropdown from "./ActionDropdown";

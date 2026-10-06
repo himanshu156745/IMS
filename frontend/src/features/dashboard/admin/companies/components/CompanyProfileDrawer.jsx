@@ -1,5 +1,6 @@
 // src/features/dashboard/admin/companies/components/CompanyProfileDrawer.jsx
-import React, { useState, useEffect } from "react";
+
+import { useState, useEffect } from "react";
 import {
   FiX,
   FiGlobe,
@@ -10,7 +11,7 @@ import {
   FiUser,
   FiStar,
 } from "react-icons/fi";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "../../../../../components/ui/StatusBadge";
 import CompanyInternships from "./CompanyInternships";
 import CompanyApplications from "./CompanyApplications";
 import CompanyStudents from "./CompanyStudents";

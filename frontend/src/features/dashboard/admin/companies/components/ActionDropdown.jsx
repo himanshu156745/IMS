@@ -1,5 +1,4 @@
 // src/features/dashboard/admin/companies/components/ActionDropdown.jsx
-import React from "react";
 import { Eye, Pencil, CheckCircle2, PauseCircle, PlayCircle, Trash2 } from "lucide-react";
 import DropdownMenu from "../../../../../components/ui/DropdownMenu";
 

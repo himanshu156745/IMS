@@ -6,10 +6,15 @@ import Attendance from "../features/dashboard/faculty/attendance/Attendance";
 import Feedback from "../features/dashboard/faculty/feedback/Feedback";
 import Performance from "../features/dashboard/faculty/performance/Performance";
 import NotFound from "../pages/NotFound";
+import ProtectedRoute from "../components/auth/ProtectedRoute";
 
 const facultyRoutes = {
   path: "/faculty",
-  element: <FacultyLayout />,
+  element: (
+    <ProtectedRoute allowedRoles={['faculty', 'mentor']}>
+      <FacultyLayout />
+    </ProtectedRoute>
+  ),
   children: [
     { index: true, element: <Dashboard /> },
     { path: "my-students", element: <MyStudents /> },

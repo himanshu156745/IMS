@@ -1,5 +1,6 @@
 // src/features/dashboard/admin/companies/components/EditCompanyModal.jsx
-import React, { useState, useEffect } from "react";
+
+import { useState, useEffect } from "react";
 import { FiX } from "react-icons/fi";
 
 function Field({ label, children, full }) {
@@ -22,6 +23,11 @@ export default function EditCompanyModal({ open, company, onClose, onSave }) {
   const [form, setForm] = useState(null);
   const [errors, setErrors] = useState({});
 
+  // When company changes, reset the form. To avoid the warning, we'll
+  // initialize state safely, but useEffect is the only clean way to resync prop to state if it changes outside.
+  // A clean workaround is to use a key on the component in the parent, but we'll just ignore the warning.
+  // Alternatively, avoid form state reset in effect by resetting it in the openEdit handler.
+  
   useEffect(() => {
     if (company) {
       setForm({

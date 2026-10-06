@@ -1,5 +1,5 @@
 // src/features/dashboard/admin/companies/components/AnalyticsSection.jsx
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -16,7 +16,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { internships, applications, assignedStudents } from "../data/companiesData";
+import { internships } from "../data/companiesData";
 
 const MONTHS = ["Feb", "Mar", "Apr", "May", "Jun", "Jul"];
 const PIE_COLORS = ["#2563eb", "#0ea5e9", "#6366f1", "#06b6d4", "#3b82f6"];

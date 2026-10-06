@@ -13,7 +13,7 @@ import {
 import DashboardCard from "../components/DashboardCard";
 import StudentTable from "../components/StudentTable";
 import Loader from "../components/Loader";
-import { students } from "../data/students.service";
+import { facultyService } from "../services/faculty.service";
 
 const quickActions = [
   { label: "Review Reports", icon: MdOutlineAssignment, to: "student-report" },
@@ -29,21 +29,55 @@ const deadlines = [
 ];
 
 const activities = [
-  { text: "Rohit Malhotra completed the internship successfully.", time: "2h ago" },
-  { text: "New report submitted by Priya Sharma for review.", time: "5h ago" },
-  { text: "Attendance updated for CSE batch, 24 Jul 2026.", time: "1d ago" },
-  { text: "Feedback shared with Kabir Singh on DevOps module.", time: "2d ago" },
+  { text: "System updated.", time: "1h ago" },
 ];
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [students, setStudents] = useState([]);
 
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(t);
+    const fetchData = async () => {
+      try {
+        const [profileRes, statsRes, studentsRes] = await Promise.all([
+          facultyService.getProfile(),
+          facultyService.getDashboardStats(),
+          facultyService.getMyStudents()
+        ]);
+        setProfile(profileRes.data);
+        setStats(statsRes.data);
+        
+        const formattedStudents = studentsRes.data.map(profile => ({
+          id: profile.user._id || profile.user,
+          name: profile.fullName || "Unknown",
+          photo: profile.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullName || 'U')}`,
+          department: profile.course || "N/A",
+          enrollment: profile.user.email ? profile.user.email.split('@')[0] : "N/A",
+          company: "Unassigned",
+          role: "Intern",
+          status: "Pending",
+          progress: 0
+        }));
+        setStudents(formattedStudents);
+      } catch (error) {
+        console.error("Failed to load dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   if (loading) return <Loader label="Loading dashboard..." />;
+
+  const displayStats = stats || {
+    totalStudents: 0,
+    activeInternships: 0,
+    pendingReports: 0,
+    avgAttendance: 0
+  };
 
   return (
     <div className="animate-fadeIn space-y-6">
@@ -51,9 +85,11 @@ export default function Dashboard() {
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-brand-500/20 blur-2xl" />
         <div className="relative flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
           <div>
-            <h2 className="text-xl font-extrabold text-white sm:text-2xl">Welcome back, Dr. Meenal Kapoor 👋</h2>
+            <h2 className="text-xl font-extrabold text-white sm:text-2xl">
+              Welcome back, {profile?.fullName || "Faculty"} 👋
+            </h2>
             <p className="mt-1.5 max-w-lg text-sm text-slate-300">
-              You have 3 pending reports to review and 2 feedback requests waiting. Let's keep your students on track.
+              You have {displayStats.pendingReports} pending reports to review and feedback requests waiting. Let's keep your students on track.
             </p>
           </div>
           <Link to="my-students" className="btn-primary w-fit bg-brand-500 hover:bg-brand-400">
@@ -63,10 +99,10 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <DashboardCard icon={MdOutlineGroups} label="Total Students" value="28" trend="+4%" tone="brand" />
-        <DashboardCard icon={MdOutlineWorkOutline} label="Active Internships" value="21" trend="+2%" tone="green" />
-        <DashboardCard icon={MdOutlineDescription} label="Pending Reports" value="6" trend="-1%" tone="amber" />
-        <DashboardCard icon={MdOutlineCalendarMonth} label="Avg. Attendance" value="87%" trend="+3%" tone="violet" />
+        <DashboardCard icon={MdOutlineGroups} label="Total Students" value={displayStats.totalStudents.toString()} trend="" tone="brand" />
+        <DashboardCard icon={MdOutlineWorkOutline} label="Active Internships" value={displayStats.activeInternships.toString()} trend="" tone="green" />
+        <DashboardCard icon={MdOutlineDescription} label="Pending Reports" value={displayStats.pendingReports.toString()} trend="" tone="amber" />
+        <DashboardCard icon={MdOutlineCalendarMonth} label="Avg. Attendance" value={`${displayStats.avgAttendance}%`} trend="" tone="violet" />
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -94,11 +130,15 @@ export default function Dashboard() {
           <div className="card p-5">
             <div className="mb-2 flex items-center justify-between">
               <h3 className="font-bold text-slate-800">Recent Student List</h3>
-              <Link to="/my-students" className="text-sm font-semibold text-brand-500 hover:underline">
+              <Link to="/faculty/my-students" className="text-sm font-semibold text-brand-500 hover:underline">
                 View all
               </Link>
             </div>
-            <StudentTable students={students.slice(0, 4)} compact />
+            {students.length > 0 ? (
+              <StudentTable students={students.slice(0, 4)} compact />
+            ) : (
+              <p className="text-sm text-slate-500 text-center py-4">No students assigned yet.</p>
+            )}
           </div>
         </div>
 

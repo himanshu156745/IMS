@@ -1,11 +1,3 @@
-// ---------------------------------------------------------------------------
-// Mock data for the Student Dashboard (IMS)
-// NOTE: This file simulates API responses. When backend endpoints are ready,
-// replace these constants with data fetched from the API (e.g. via fetch/axios
-// inside hooks like useStudentProfile(), useApplications(), etc.) while keeping
-// the exact same shape so the UI components require no changes.
-// ---------------------------------------------------------------------------
-
 export const studentProfile = {
   id: "STU-2024-001",
   name: "Rahul",

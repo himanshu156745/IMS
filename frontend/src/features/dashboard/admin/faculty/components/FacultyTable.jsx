@@ -9,7 +9,7 @@ import {
 import Table from "../../../../../components/ui/Table";
 import DropdownMenu from "../../../../../components/ui/DropdownMenu";
 import { TableRowSkeleton } from "../../../../../components/ui/SkeletonLoader";
-import FacultyStatusBadge from "./FacultyStatusBadge";
+import StatusBadge from "../../../../../components/ui/StatusBadge";
 
 export default function FacultyTable({ rows, loading, onAction }) {
   const columns = [
@@ -46,7 +46,7 @@ export default function FacultyTable({ rows, loading, onAction }) {
     {
       key: "status",
       label: "Status",
-      render: (row) => <FacultyStatusBadge status={row.status} />,
+      render: (row) => <StatusBadge status={row.status} />,
     },
     {
       key: "joiningDate",

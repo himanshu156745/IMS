@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function TopNavbar({ onMenuClick }) {
-
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -66,17 +65,8 @@ export default function TopNavbar({ onMenuClick }) {
               </svg>
             </button>
 
-            {/* Theme Toggle - Hidden on small mobile */}
-            {/* <button className="hidden sm:block p-2 sm:p-3 hover:bg-gray-100 rounded-xl transition-colors shrink-0">
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-            </button> */}
-
-
-
-            {/* Messages - Hidden on mobile */}
-            <button className=" sm:block p-2 sm:p-3 hover:bg-gray-100 rounded-xl transition-colors relative shrink-0">
+            {/* Messages */}
+            <button className="sm:block p-2 sm:p-3 hover:bg-gray-100 rounded-xl transition-colors relative shrink-0">
               <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
               </svg>

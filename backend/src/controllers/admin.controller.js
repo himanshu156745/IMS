@@ -4,7 +4,6 @@ const Application = require('../models/Application.model');
 const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const asyncHandler = require('../utils/asyncHandler');
-
 /**
  * @desc    Get dashboard statistics
  * @route   GET /api/v1/admin/stats

@@ -7,10 +7,15 @@ import ManageInternships from "../features/dashboard/admin/internships/ManageInt
 import ViewApplications from "../features/dashboard/admin/applications/ViewApplications";
 import ReportsAnalytics from "../features/dashboard/admin/reports/ReportsAnalytics";
 import AdminSettings from "../features/dashboard/admin/settings/AdminSettings";
+import ProtectedRoute from "../components/auth/ProtectedRoute";
 
 const adminRoutes = {
   path: "/admin",
-  element: <DashboardLayout />,
+  element: (
+    <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
+      <DashboardLayout />
+    </ProtectedRoute>
+  ),
   children: [
     { index: true, element: <AdminDashboard /> },
     { path: "students", element: <ManageStudents /> },

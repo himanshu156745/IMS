@@ -1,10 +1,9 @@
 // src/features/dashboard/admin/companies/ManageCompanies.jsx
-import React, { useMemo, useState, useEffect, useCallback } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { FiPlus, FiDownload, FiRefreshCw } from "react-icons/fi";
 import PageHeader from "../../../../components/ui/PageHeader";
 
 import CompaniesSkeleton from "./components/CompaniesSkeleton";
-import CompanyStats from "./components/CompanyStats";
 import CompanyFilters from "./components/CompanyFilters";
 import CompanyTable from "./components/CompanyTable";
 import CompanyProfileDrawer from "./components/CompanyProfileDrawer";
@@ -12,13 +11,13 @@ import AddCompanyModal from "./components/AddCompanyModal";
 import EditCompanyModal from "./components/EditCompanyModal";
 import DeleteConfirmationModal from "./components/DeleteConfirmationModal";
 import NotificationPanel from "./components/NotificationPanel";
-import ActivityTimeline from "./components/ActivityTimeline";
+import ActivityTimeline from "../../../../components/ui/ActivityTimeline";
+import axiosInstance from "../../../../utils/axiosInstance";
+import { toast } from "react-hot-toast";
 
 import {
-  companies as initialCompanies,
   notifications,
   activities,
-  getCompanyStats,
 } from "./data/companiesData";
 
 const PAGE_SIZE = 8;
@@ -32,26 +31,8 @@ const DEFAULT_FILTERS = {
   sort: "name-asc",
 };
 
-/**
- * NOTE ON SHARED COMPONENTS
- * -------------------------
- * Matches the real shared component APIs from src/components/ui:
- *   - PageHeader    : { title, subtitle, actions }
- *   - StatCard      : { label, value, sub, status: "onTrack"|"attention"|"overdue"|"neutral", trend }
- *   - Table         : { columns: [{ key, label, render(row) }], rows, emptyText }
- *   - Pagination    : { page, totalPages, onPageChange }
- *   - DropdownMenu  : { items: [{ label, Icon, onClick, danger? }] } (renders its own trigger)
- *   - Badge         : { variant: "onTrack"|"attention"|"overdue"|"neutral", children }
- *   - EmptyState    : { onCreateClick } — copy is hardcoded ("No Internships Found") in
- *                      the shared component itself, so it will show that text everywhere
- *                      it's used in this feature too. Update EmptyState.jsx to accept a
- *                      title/description prop if you want context-specific empty copy.
- *   - SkeletonLoader: named exports StatCardSkeleton / TableRowSkeleton / ExpandedDetailsSkeleton
- * All feature-specific logic (filtering, sorting, CRUD on dummy data)
- * lives in this file via useState/useMemo — no Redux, no Context, no API.
- */
 export default function ManageCompanies() {
-  const [companies, setCompanies] = useState(initialCompanies);
+  const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [page, setPage] = useState(1);
@@ -64,13 +45,35 @@ export default function ManageCompanies() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // Simulate an initial fetch so SkeletonLoader has a purpose.
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 700);
-    return () => clearTimeout(t);
-  }, []);
+  const fetchCompanies = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get('/admin/companies');
+      const formattedCompanies = response.data.data.map((c) => ({
+        id: c._id,
+        name: c.name,
+        industry: c.industry || "Other",
+        location: c.location,
+        hrName: c.hrName || "N/A",
+        email: c.user?.email || "",
+        status: c.user?.isActive ? "Active" : "Inactive",
+        verificationStatus: c.verificationStatus || "Pending",
+        website: c.website || "",
+        description: c.description || "",
+        registrationDate: c.createdAt,
+        user: c.user?._id,
+      }));
+      setCompanies(formattedCompanies);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to fetch companies');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const stats = useMemo(() => getCompanyStats(companies), [companies]);
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
 
   const filteredCompanies = useMemo(() => {
     let rows = [...companies];
@@ -102,10 +105,10 @@ export default function ManageCompanies() {
         rows.sort((a, b) => b.name.localeCompare(a.name));
         break;
       case "rating-desc":
-        rows.sort((a, b) => b.rating - a.rating);
+        rows.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case "students-desc":
-        rows.sort((a, b) => b.studentsAssigned - a.studentsAssigned);
+        rows.sort((a, b) => (b.studentsAssigned || 0) - (a.studentsAssigned || 0));
         break;
       case "date-desc":
         rows.sort(
@@ -129,10 +132,10 @@ export default function ManageCompanies() {
     Math.ceil(filteredCompanies.length / PAGE_SIZE),
   );
 
-  // Reset to page 1 whenever filters change.
-  useEffect(() => setPage(1), [filters]);
-
-  const handleFiltersChange = useCallback((next) => setFilters(next), []);
+  const handleFiltersChange = useCallback((next) => {
+    setFilters(next);
+    setPage(1);
+  }, []);
 
   // --- Row actions -----------------------------------------------------
   const openProfile = (company) => {
@@ -146,54 +149,84 @@ export default function ManageCompanies() {
     setEditOpen(true);
   };
 
-  const handleVerify = (company) => {
-    setCompanies((prev) =>
-      prev.map((c) =>
-        c.id === company.id ? { ...c, verificationStatus: "Verified" } : c,
-      ),
-    );
+  const handleVerify = async (company) => {
+    try {
+      await axiosInstance.patch(`/admin/companies/${company.id}/verification`, {
+        verificationStatus: 'Verified',
+      });
+      toast.success('Company verified successfully');
+      fetchCompanies();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to verify company');
+    }
   };
-  const handleSuspend = (company) => {
-    setCompanies((prev) =>
-      prev.map((c) =>
-        c.id === company.id
-          ? { ...c, status: "Inactive", verificationStatus: "Suspended" }
-          : c,
-      ),
-    );
+
+  const handleSuspend = async (company) => {
+    try {
+      await axiosInstance.patch(`/admin/companies/${company.id}/verification`, {
+        verificationStatus: 'Suspended',
+      });
+      toast.success('Company suspended successfully');
+      fetchCompanies();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to suspend company');
+    }
   };
-  const handleActivate = (company) => {
-    setCompanies((prev) =>
-      prev.map((c) => (c.id === company.id ? { ...c, status: "Active" } : c)),
-    );
+
+  const handleActivate = async (company) => {
+    try {
+      await axiosInstance.patch(`/admin/users/${company.user}/status`, {
+        isActive: true,
+      });
+      toast.success('Company activated successfully');
+      fetchCompanies();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to activate company');
+    }
   };
 
   const requestDelete = (company) => {
     setDeleteTarget(company);
     setDeleteOpen(true);
   };
-  const confirmDelete = (company) => {
-    setCompanies((prev) => prev.filter((c) => c.id !== company.id));
-    setDeleteOpen(false);
-    setDeleteTarget(null);
+
+  const confirmDelete = async (company) => {
+    try {
+      await axiosInstance.delete(`/admin/companies/${company.id}`);
+      toast.success('Company deleted successfully');
+      setDeleteOpen(false);
+      setDeleteTarget(null);
+      fetchCompanies();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete company');
+    }
   };
 
-  const handleAddSave = (newCompany) => {
-    setCompanies((prev) => [newCompany, ...prev]);
-    setAddOpen(false);
+  const handleAddSave = async (newCompany) => {
+    try {
+      await axiosInstance.post('/admin/companies', newCompany);
+      toast.success('Company added successfully');
+      setAddOpen(false);
+      fetchCompanies();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to add company');
+    }
   };
 
-  const handleEditSave = (updatedCompany) => {
-    setCompanies((prev) =>
-      prev.map((c) => (c.id === updatedCompany.id ? updatedCompany : c)),
-    );
-    setEditOpen(false);
-    setEditTarget(null);
+  const handleEditSave = async (updatedCompany) => {
+    try {
+      await axiosInstance.put(`/admin/companies/${updatedCompany.id}`, updatedCompany);
+      toast.success('Company updated successfully');
+      setEditOpen(false);
+      setEditTarget(null);
+      fetchCompanies();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update company');
+    }
   };
 
   const handleRefresh = () => {
-    setLoading(true);
-    setTimeout(() => setLoading(false), 600);
+    fetchCompanies();
   };
 
   const handleExport = () => {
@@ -262,8 +295,6 @@ export default function ManageCompanies() {
           </div>
         }
       />
-
-      {/* <CompanyStats stats={stats} loading={loading} /> */}
 
       <CompanyFilters filters={filters} onChange={handleFiltersChange} />
 

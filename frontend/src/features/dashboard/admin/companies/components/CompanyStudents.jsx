@@ -1,8 +1,8 @@
 // src/features/dashboard/admin/companies/components/CompanyStudents.jsx
-import React from "react";
+
 import Table from "../../../../../components/ui/Table";
 import EmptyState from "../../../../../components/ui/EmptyState";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "../../../../../components/ui/StatusBadge";
 import { assignedStudents } from "../data/companiesData";
 
 function AttendanceBar({ value }) {

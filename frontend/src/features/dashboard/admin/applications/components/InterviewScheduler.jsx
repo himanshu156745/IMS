@@ -5,13 +5,14 @@ const inputClass =
   "w-full rounded-xl border border-line bg-white px-3.5 py-2 text-sm font-body text-heading placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors";
 
 export default function InterviewScheduler({ application, onClose, onSave }) {
-  if (!application) return null;
-  const existing = application.interview;
+  const existing = application?.interview;
 
   const [date, setDate] = useState(existing?.date || "");
   const [time, setTime] = useState(existing?.time || "");
   const [link, setLink] = useState(existing?.link || "");
   const [notes, setNotes] = useState(existing?.notes || "");
+
+  if (!application) return null;
 
   const handleSave = () => {
     onSave({ date, time, link, notes, mode: link ? "Online" : "In-Person", status: "Interview Scheduled" });

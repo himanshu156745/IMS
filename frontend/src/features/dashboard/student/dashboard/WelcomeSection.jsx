@@ -1,8 +1,32 @@
 import { useNavigate } from "react-router-dom";
 
-export default function WelcomeSection({primaryBtn,secondaryBtn,activeStatus}) {
-  console.log(activeStatus)
-  const navigate = useNavigate()
+export default function WelcomeSection({ user, primaryBtn, secondaryBtn, activeStatus }) {
+  const navigate = useNavigate();
+
+  // Extract display name from user object or fall back to "Rahul"
+  let displayName = "Rahul";
+  if (user && user.email) {
+    const prefix = user.email.split('@')[0];
+    displayName = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+  }
+
+  // Handle navigation based on active status or default action
+  const handlePrimaryClick = () => {
+    if (activeStatus !== undefined) {
+      navigate(activeStatus ? "/students/applications" : "/students/view-internships");
+    } else {
+      navigate('/students/applications');
+    }
+  };
+
+  const handleSecondaryClick = () => {
+    if (activeStatus !== undefined) {
+      navigate(activeStatus ? "/students/reports" : "/students/profile");
+    } else {
+      navigate('/students/reports');
+    }
+  };
+
   return (
     <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 lg:p-12 mb-6 shadow-xl overflow-hidden relative">
       {/* Background pattern */}
@@ -15,17 +39,23 @@ export default function WelcomeSection({primaryBtn,secondaryBtn,activeStatus}) {
         {/* Text Content */}
         <div>
           <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
-            Welcome Back, Rahul 👋
+            Welcome Back{displayName ? `, ${displayName}` : ""} 👋
           </h1>
           <p className="text-lg text-blue-100 leading-relaxed">
             Track your internships, attendance, reports, and applications from one place.
           </p>
           <div className="flex gap-4 mt-6">
-            <button onClick={()=>{!activeStatus?navigate("/students/view-internships"):navigate("/students/applications")}} className="px-6 py-3 bg-white text-blue-600 rounded-xl font-semibold hover:shadow-2xl transition-all hover:scale-105">
-              {!activeStatus?primaryBtn:"View Applications"}
+            <button 
+              onClick={handlePrimaryClick} 
+              className="px-6 py-3 bg-white text-blue-600 rounded-xl font-semibold hover:shadow-2xl transition-all hover:scale-105"
+            >
+              {activeStatus ? "View Applications" : (primaryBtn || "View Applications")}
             </button>
-            <button onClick={()=>{!activeStatus?navigate("/students/profile"):navigate("/students/reports")}} className="px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 transition-all">
-              {!activeStatus?secondaryBtn:"submit report"}
+            <button 
+              onClick={handleSecondaryClick} 
+              className="px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 transition-all"
+            >
+              {activeStatus ? "Submit Report" : (secondaryBtn || "Submit Report")}
             </button>
           </div>
         </div>

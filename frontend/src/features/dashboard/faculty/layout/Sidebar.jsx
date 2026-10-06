@@ -9,6 +9,8 @@ import {
   MdOutlineLogout,
   MdClose,
 } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../../hooks/useAuth";
 
 const navItems = [
   { to: "", label: "Dashboard", icon: MdSpaceDashboard, end: true },
@@ -20,6 +22,18 @@ const navItems = [
 ];
 
 export default function Sidebar({ isOpen, onClose }) {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch {
+      navigate('/login');
+    }
+  };
+
   return (
     <>
       {isOpen && (
@@ -68,7 +82,10 @@ export default function Sidebar({ isOpen, onClose }) {
           ))}
         </nav>
 
-        <button className="sidebar-link mt-2 hover:bg-red-500/10 hover:text-red-400">
+        <button 
+          onClick={handleLogout}
+          className="sidebar-link mt-2 hover:bg-red-500/10 hover:text-red-400"
+        >
           <MdOutlineLogout size={20} />
           <span>Logout</span>
         </button>

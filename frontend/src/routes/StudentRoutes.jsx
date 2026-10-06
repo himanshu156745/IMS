@@ -7,10 +7,15 @@ import DailyReports from "../features/dashboard/student/dashboard/DailyReports";
 import AttendancePage from "../features/dashboard/student/attendance/AttendancePage";
 import Certificates from "../features/dashboard/student/dashboard/Certificates";
 
-export const studentRoutes = {
+import ProtectedRoute from "../components/auth/ProtectedRoute";
 
+export const studentRoutes = {
     path: "/students",
-    element: <StudentDashboard />,
+    element: (
+        <ProtectedRoute allowedRoles={['student']}>
+            <StudentDashboard />
+        </ProtectedRoute>
+    ),
     children: [
         {
             path: "profile",
@@ -21,7 +26,7 @@ export const studentRoutes = {
             element: <ViewInternships />
         },
         {
-            path: "apply",
+            path: "apply/:internshipId",
             element: <ApplyInternship />
         },
         {

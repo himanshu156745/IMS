@@ -1,6 +1,6 @@
-import LandingPage from "../features/dashboard/landingPage/LandingPage";
+import Landing from "../pages/Landing";
 
 export const landingPage = {
     path:"/",
-    element:<LandingPage/>
+    element:<Landing/>
 }

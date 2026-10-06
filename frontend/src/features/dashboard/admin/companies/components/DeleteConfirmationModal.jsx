@@ -1,5 +1,4 @@
 // src/features/dashboard/admin/companies/components/DeleteConfirmationModal.jsx
-import React from "react";
 import { FiAlertTriangle } from "react-icons/fi";
 
 /**

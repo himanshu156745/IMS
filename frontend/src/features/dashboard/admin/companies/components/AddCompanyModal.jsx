@@ -1,5 +1,5 @@
 // src/features/dashboard/admin/companies/components/AddCompanyModal.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { FiX } from "react-icons/fi";
 
 const EMPTY_FORM = {
@@ -56,22 +56,7 @@ export default function AddCompanyModal({ open, onClose, onSave }) {
 
     onSave({
       ...form,
-      id: `CMP-${Date.now()}`,
-      logo: form.name
-        .split(" ")
-        .map((w) => w[0])
-        .slice(0, 2)
-        .join("")
-        .toUpperCase(),
-      logoColor: "bg-blue-600",
-      location: form.address || "Not specified",
-      registrationDate: new Date().toISOString().slice(0, 10),
-      verificationStatus: "Pending",
-      status: "Active",
-      rating: 0,
-      activeInternships: 0,
-      studentsAssigned: 0,
-      totalApplications: 0,
+      location: form.address || "Not specified"
     });
 
     setForm(EMPTY_FORM);

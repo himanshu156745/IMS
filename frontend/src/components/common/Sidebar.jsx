@@ -11,6 +11,8 @@ import {
   LogOut,
   X,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 const NAV_ITEMS = [
   { to: "/admin", label: "Dashboard", Icon: LayoutGrid, end: true },
@@ -24,9 +26,16 @@ const NAV_ITEMS = [
 ];
 
 export default function Sidebar({ isOpen, onClose }) {
-  const handleLogout = () => {
-    // TODO: clear auth token/session + redirect to /login once auth module is wired
-    console.log("logout clicked");
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch {
+      navigate('/login');
+    }
   };
 
   return (

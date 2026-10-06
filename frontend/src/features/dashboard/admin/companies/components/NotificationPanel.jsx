@@ -1,5 +1,4 @@
 // src/features/dashboard/admin/companies/components/NotificationPanel.jsx
-import React from "react";
 import { FiUserPlus, FiClock, FiEdit3, FiXCircle, FiBell } from "react-icons/fi";
 import EmptyState from "../../../../../components/ui/EmptyState";
 

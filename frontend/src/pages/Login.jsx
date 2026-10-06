@@ -1,18 +1,22 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Mail, Lock, ArrowRight } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const from = location.state?.from?.pathname || "/";
+  const justRegistered = location.state?.registered;
 
   useEffect(() => {
     setEmail("");
@@ -23,24 +27,34 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+
     try {
-      const res = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const data = await login(email, password);
+      setMessage("Login successful.");
 
-      const data = await res.json();
-
-      if (res.ok) {
-        setMessage("Login successful.");
-        login(data.user, data.token);
-        setTimeout(() => navigate("/dashboard"), 500);
-      } else {
-        setMessage(data.message || "Invalid credentials.");
-      }
+      // Role-based navigation redirect or back to originally requested route
+      setTimeout(() => {
+        if (from === "/") {
+          const role = data?.user?.role;
+          if (role === "admin" || role === "super_admin") {
+            navigate("/admin");
+          } else if (role === "student") {
+            navigate("/students");
+          } else if (role === "faculty" || role === "mentor") {
+            navigate("/faculty");
+          } else if (role === "company") {
+            navigate("/company");
+          } else {
+            navigate("/dashboard");
+          }
+        } else {
+          navigate(from, { replace: true });
+        }
+      }, 500);
     } catch (error) {
-      setMessage("Server error. Please try again.");
+      setMessage(
+        error.response?.data?.message || "Invalid credentials or server error."
+      );
     } finally {
       setLoading(false);
     }
@@ -48,15 +62,19 @@ export default function Login() {
 
   return (
     <div className="grid min-h-screen grid-cols-1 bg-slate-50 md:grid-cols-2">
-      {/* LEFT — brand panel */}
+      {/* LEFT — Brand panel */}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-slate-950 p-12 text-white md:flex">
         <div className="absolute -right-16 -top-16 h-72 w-72 rounded-full bg-blue-600/20 blur-3xl" />
         <div className="absolute -bottom-10 -left-10 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl" />
 
         <div className="z-10 flex items-center gap-3.5">
-          <img src="/rid-tech-logo.jpeg" alt="RID Tech Pvt Ltd" className="h-12 w-auto object-contain" />
+          <img
+            src="/rid-tech-logo.jpeg"
+            alt="RID Tech Pvt Ltd"
+            className="h-12 w-auto object-contain"
+          />
           <span className="h-9 w-px bg-white/20" />
-          <span className="text-lg font-extrabold  leading-tight tracking-wide text-white">
+          <span className="text-lg font-extrabold leading-tight tracking-wide text-white">
             Internship Management System
           </span>
         </div>
@@ -77,16 +95,28 @@ export default function Login() {
         </p>
       </div>
 
-      {/* RIGHT — form */}
+      {/* RIGHT — Form */}
       <div className="flex items-center justify-center p-8 md:p-16">
         <div className="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-8 shadow-xl">
-          <h2 className="mb-2 text-3xl font-extrabold text-slate-900">Welcome back</h2>
+          <h2 className="mb-2 text-3xl font-extrabold text-slate-900">
+            Welcome back
+          </h2>
           <p className="mb-6 text-slate-500">Login to continue to IMS Engine</p>
 
+          {/* Just Registered Success Alert */}
+          {justRegistered && (
+            <div className="mb-4 text-center text-sm font-semibold text-emerald-700 bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+              Account created successfully! Please log in.
+            </div>
+          )}
+
+          {/* Feedback Message */}
           {message && (
             <p
               className={`mb-4 text-center text-sm font-semibold ${
-                message.includes("successful") ? "text-emerald-600" : "text-red-500"
+                message.includes("successful")
+                  ? "text-emerald-600"
+                  : "text-red-500"
               }`}
             >
               {message}
@@ -94,9 +124,23 @@ export default function Login() {
           )}
 
           <form onSubmit={handleLogin} autoComplete="off" className="space-y-5">
-            {/* Hidden fields to block browser autofill */}
-            <input type="text" name="fakeuser" autoComplete="username" hidden readOnly value="" />
-            <input type="password" name="fakepass" autoComplete="new-password" hidden readOnly value="" />
+            {/* Hidden inputs to bypass browser aggressive autofill */}
+            <input
+              type="text"
+              name="fakeuser"
+              autoComplete="username"
+              hidden
+              readOnly
+              value=""
+            />
+            <input
+              type="password"
+              name="fakepass"
+              autoComplete="new-password"
+              hidden
+              readOnly
+              value=""
+            />
 
             {/* EMAIL */}
             <div>
@@ -134,7 +178,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* BUTTON */}
+            {/* SUBMIT BUTTON */}
             <button
               type="submit"
               disabled={loading}
@@ -154,17 +198,26 @@ export default function Login() {
             {/* GOOGLE LOGIN */}
             <button
               type="button"
-              onClick={() => (window.location.href = `${API_URL}/auth/google`)}
+              onClick={() =>
+                (window.location.href = `${API_URL}/auth/google`)
+              }
               className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-slate-200 py-3 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
             >
-              <img src="https://www.google.com/favicon.ico" alt="Google" className="h-5 w-5" />
+              <img
+                src="https://www.google.com/favicon.ico"
+                alt="Google"
+                className="h-5 w-5"
+              />
               Continue with Google
             </button>
 
             {/* SIGNUP LINK */}
             <p className="text-center text-sm text-slate-500">
               Don&apos;t have an account?{" "}
-              <Link to="/signup" className="font-bold text-blue-600 hover:underline">
+              <Link
+                to="/signup"
+                className="font-bold text-blue-600 hover:underline"
+              >
                 Sign up
               </Link>
             </p>

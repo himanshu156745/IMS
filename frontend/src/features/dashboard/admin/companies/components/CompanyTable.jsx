@@ -1,11 +1,10 @@
 // src/features/dashboard/admin/companies/components/CompanyTable.jsx
-import React from "react";
 import { FiStar, FiGlobe, FiMail, FiPhone } from "react-icons/fi";
 import Table from "../../../../../components/ui/Table";
 import Pagination from "../../../../../components/ui/Pagination";
 import { TableRowSkeleton } from "../../../../../components/ui/SkeletonLoader";
 import EmptyState from "../../../../../components/ui/EmptyState";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "../../../../../components/ui/StatusBadge";
 import ActionDropdown from "./ActionDropdown";
 
 /**

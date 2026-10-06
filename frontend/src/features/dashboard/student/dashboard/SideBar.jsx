@@ -1,8 +1,8 @@
-
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../../hooks/useAuth";
 import { studentProfile } from "../data/Data";
 
-const hasActiveInternship = studentProfile.hasActiveInternship;
+const hasActiveInternship = studentProfile?.hasActiveInternship;
 
 export default function Sidebar({
   collapsed,
@@ -13,6 +13,7 @@ export default function Sidebar({
   setMobileMenuOpen
 }) {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const baseMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
@@ -23,28 +24,47 @@ export default function Sidebar({
     { id: 'certificates', label: 'Certificates', icon: '🎓' },
   ];
 
+  // Dynamically insert active internship pages if applicable
   const menuItems = hasActiveInternship
-    ? [...baseMenuItems.slice(0, 5), { id: 'reports', label: 'Daily Reports', icon: '📝' }, { id: 'attendance', label: 'Attendance', icon: '📅' }, ...baseMenuItems.slice(5)]
+    ? [
+        ...baseMenuItems.slice(0, 5),
+        { id: 'reports', label: 'Daily Reports', icon: '📝' },
+        { id: 'attendance', label: 'Attendance', icon: '📅' },
+        ...baseMenuItems.slice(5)
+      ]
     : baseMenuItems;
 
-  const handleNavigation = (item) => {
-    setActiveTab(item.id);
-    if (item.id === "dashboard") {
+  const handleNavigation = (itemId) => {
+    if (setActiveTab) setActiveTab(itemId);
+
+    if (itemId === "dashboard") {
       navigate("/students");
     } else {
-      navigate(`/students/${item.id}`);
+      navigate(`/students/${itemId}`);
     }
-    // Close mobile menu after navigation
-    setMobileMenuOpen(false);
+
+    // Close drawer on mobile after navigation
+    if (setMobileMenuOpen) {
+      setMobileMenuOpen(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      if (logout) await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-white">
       {/* Logo Section */}
       <div className="p-4 sm:p-6 border-b border-gray-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg shrink-0">
               <span className="text-white font-bold text-lg">IMS</span>
             </div>
             {(!collapsed || mobileMenuOpen) && (
@@ -57,7 +77,8 @@ export default function Sidebar({
           {/* Desktop Toggle Button */}
           <button
             onClick={onToggle}
-            className="hidden lg:block p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Toggle sidebar"
+            className="hidden lg:block p-2 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none"
           >
             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={collapsed ? "M13 5l7 7-7 7M5 5l7 7-7 7" : "M11 19l-7-7 7-7m8 14l-7-7 7-7"} />
@@ -66,8 +87,9 @@ export default function Sidebar({
 
           {/* Mobile Close Button */}
           <button
-            onClick={() => setMobileMenuOpen(false)}
-            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            onClick={() => setMobileMenuOpen && setMobileMenuOpen(false)}
+            aria-label="Close mobile menu"
+            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none"
           >
             <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -76,7 +98,7 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Student Info */}
+      {/* Student Profile Overview */}
       {(!collapsed || mobileMenuOpen) && (
         <div className="px-4 sm:px-6 py-3 border-b border-gray-100">
           <div className="flex items-center gap-3">
@@ -97,11 +119,12 @@ export default function Sidebar({
         {menuItems.map((item) => (
           <button
             key={item.id}
-            onClick={() => handleNavigation(item)}
-            className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl mb-2 transition-all duration-200 ${activeTab === item.id
+            onClick={() => handleNavigation(item.id)}
+            className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl mb-2 transition-all duration-200 ${
+              activeTab === item.id
                 ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-200'
                 : 'text-gray-700 hover:bg-gray-100'
-              }`}
+            }`}
           >
             <span className="text-xl shrink-0">{item.icon}</span>
             {(!collapsed || mobileMenuOpen) && (
@@ -111,12 +134,13 @@ export default function Sidebar({
         ))}
       </nav>
 
-      {/* Logout Button */}
+      {/* Logout Action */}
       <div className="px-2 sm:px-4 py-2 border-t border-gray-100">
-        <button className="w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
-          <span className="text-xl shrink-0">
-            <img src="/switch.png" alt="Switch icon" className="w-6 h-6 object-contain" />
-          </span>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+        >
+          <span className="text-xl shrink-0">🚪</span>
           {(!collapsed || mobileMenuOpen) && (
             <span className="font-medium text-sm sm:text-base">Logout</span>
           )}
@@ -127,21 +151,29 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Mobile Sidebar */}
-      <aside className={`
-        fixed left-0 top-0 h-screen bg-white border-r border-gray-200 
-        transition-transform duration-300 z-50 lg:hidden w-72
-        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+      {/* Mobile Backdrop Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+          onClick={() => setMobileMenuOpen && setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Mobile Drawer */}
+      <aside
+        className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-200 transition-transform duration-300 z-50 lg:hidden w-72 ${
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         <SidebarContent />
       </aside>
 
       {/* Desktop Sidebar */}
-      <aside className={`
-        hidden lg:block fixed left-0 top-0 h-screen bg-white border-r border-gray-200 
-        transition-all duration-300 z-40
-        ${collapsed ? 'w-20' : 'w-72'}
-      `}>
+      <aside
+        className={`hidden lg:block fixed left-0 top-0 h-screen bg-white border-r border-gray-200 transition-all duration-300 z-40 ${
+          collapsed ? 'w-20' : 'w-72'
+        }`}
+      >
         <SidebarContent />
       </aside>
     </>

@@ -1,24 +1,21 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import LandingPage from "./features/dashboard/landingPage/LandingPage"
+import Register from "./pages/Register"; // Or Signup depending on your filename
+import NotFound from "./pages/NotFound";
 
+import { landingPage } from "./routes/LandingPageRoutes";
 import { studentRoutes } from "./routes/StudentRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import facultyRoutes from "./routes/facultyRoutes";
+import companyRoutes from "./routes/companyRoutes";
 
 import "./App.css";
 
 const router = createBrowserRouter([
-  // Landing Page Routes
-  LandingPage,
-
-  // Direct Landing Page
-  {
-    path: "/",
-    element: <LandingPage />,
-  },
+  // Landing Page Route object
+  landingPage,
 
   // Authentication
   {
@@ -26,22 +23,34 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
+    path: "/register",
+    element: <Register />,
+  },
+  {
     path: "/signup",
-    element: <Signup />,
+    element: <Register />, // Alias to support both /signup and /register URLs
   },
 
-  // Student Routes
+  // Role-Based Module Routes
   studentRoutes,
-
-  // Admin Routes
   adminRoutes,
-
-  // Faculty Routes
   facultyRoutes,
+  companyRoutes,
+
+  // Fallback 404 Route
+  {
+    path: "*",
+    element: <NotFound />,
+  },
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <Toaster position="top-right" />
+    </>
+  );
 }
 
 export default App;

@@ -7,7 +7,7 @@ import ApplicationFilters from "./components/ApplicationFilters";
 import ApplicationsTable from "./components/ApplicationsTable";
 import BulkActionBar from "./components/BulkActionBar";
 import NotificationPanel from "./components/NotificationPanel";
-import ActivityTimeline from "./components/ActivityTimeline";
+import ActivityTimeline from "../../../../components/ui/ActivityTimeline";
 import AnalyticsSection from "./components/AnalyticsSection";
 import StudentProfileDrawer from "./components/StudentProfileDrawer";
 import ResumePreviewModal from "./components/ResumePreviewModal";
@@ -43,8 +43,10 @@ export default function ViewApplications() {
   }, []);
 
   const filtered = useMemo(() => {
+    const q = filters.query.toLowerCase();
+    const minCgpaNum = filters.minCgpa ? parseFloat(filters.minCgpa) : 0;
+
     return applications.filter((a) => {
-      const q = filters.query.toLowerCase();
       if (
         q &&
         !a.student.name.toLowerCase().includes(q) &&
@@ -59,10 +61,7 @@ export default function ViewApplications() {
       if (filters.college && a.student.college !== filters.college)
         return false;
       if (filters.priority && a.priority !== filters.priority) return false;
-      if (
-        filters.minCgpa &&
-        parseFloat(a.student.cgpa) < parseFloat(filters.minCgpa)
-      )
+      if (minCgpaNum && parseFloat(a.student.cgpa) < minCgpaNum)
         return false;
       return true;
     });
@@ -93,21 +92,17 @@ export default function ViewApplications() {
   };
 
   const handleBulkAction = (action) => {
+    if (selectedIds.length === 0) return;
+
     switch (action) {
       case "accept":
-        selectedIds.forEach((id) =>
-          updateApplication(id, { status: "Accepted" }),
-        );
+        setApplications((prev) => prev.map(a => selectedIds.includes(a.id) ? { ...a, status: "Accepted" } : a));
         break;
       case "reject":
-        selectedIds.forEach((id) =>
-          updateApplication(id, { status: "Rejected" }),
-        );
+        setApplications((prev) => prev.map(a => selectedIds.includes(a.id) ? { ...a, status: "Rejected" } : a));
         break;
       case "assign":
-        selectedIds.forEach((id) =>
-          updateApplication(id, { status: "Assigned" }),
-        );
+        setApplications((prev) => prev.map(a => selectedIds.includes(a.id) ? { ...a, status: "Assigned" } : a));
         break;
       case "export":
         alert(`Exporting ${selectedIds.length} applications (demo only).`);

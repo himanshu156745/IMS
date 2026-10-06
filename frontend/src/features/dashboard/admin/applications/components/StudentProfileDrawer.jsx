@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import Badge from "../../../../../components/ui/Badge";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "../../../../../components/ui/StatusBadge";
 import StatusPipeline from "./StatusPipeline";
 import DocumentsSection from "./DocumentsSection";
 import ApplicationHistory from "./ApplicationHistory";

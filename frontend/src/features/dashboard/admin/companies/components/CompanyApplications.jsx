@@ -1,9 +1,9 @@
 // src/features/dashboard/admin/companies/components/CompanyApplications.jsx
-import React from "react";
+
 import { FiFileText, FiEye } from "react-icons/fi";
 import Table from "../../../../../components/ui/Table";
 import EmptyState from "../../../../../components/ui/EmptyState";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "../../../../../components/ui/StatusBadge";
 import { applications } from "../data/companiesData";
 
 const columns = [

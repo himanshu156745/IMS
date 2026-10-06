@@ -66,7 +66,6 @@ app.use('/api/v1/attendance', attendanceRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/certificates', certificateRoutes);
 app.use('/api/v1/faculty', facultyRoutes);
-
 // Root Route
 app.get('/', (req, res) => {
     res.status(200).json({ success: true, message: "IMS API is running securely" });

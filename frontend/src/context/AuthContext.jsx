@@ -1,47 +1,55 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
+import axiosInstance from '../utils/axiosInstance';
+import { AuthContext } from '../hooks/useAuth';
 
-const AuthContext = createContext(null);
+export const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
+    const checkAuth = async () => {
+        try {
+            const { data } = await axiosInstance.get('/users/me');
+            setUser(data.data.user);
+        } catch {
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("ims_user");
-    const storedToken = localStorage.getItem("ims_token");
-    if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
-      setToken(storedToken);
-    }
-    setLoading(false);
-  }, []);
+    useEffect(() => {
+        checkAuth();
 
-  const login = (userData, authToken) => {
-    setUser(userData);
-    setToken(authToken);
-    localStorage.setItem("ims_user", JSON.stringify(userData));
-    localStorage.setItem("ims_token", authToken);
-  };
+        const handleUnauthorized = () => {
+            setUser(null);
+        };
 
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem("ims_user");
-    localStorage.removeItem("ims_token");
-  };
+        window.addEventListener('unauthorized', handleUnauthorized);
+        return () => window.removeEventListener('unauthorized', handleUnauthorized);
+    }, []);
 
-  return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
+    const login = async (email, password) => {
+        const { data } = await axiosInstance.post('/users/login', { email, password });
+        setUser(data.data.user);
+        return data.data;
+    };
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-}
+    const logout = async () => {
+        await axiosInstance.post('/users/logout');
+        setUser(null);
+    };
+
+    const value = {
+        user,
+        loading,
+        login,
+        logout,
+        checkAuth,
+    };
+
+    return (
+        <AuthContext.Provider value={value}>
+            {!loading && children}
+        </AuthContext.Provider>
+    );
+};

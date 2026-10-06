@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  X, MapPin, Clock, Wallet, User, Mail, FileText, CheckCircle2, Circle,
+  X,
+  MapPin,
+  Clock,
+  Wallet,
+  User,
+  Mail,
+  FileText,
+  CheckCircle2,
 } from "lucide-react";
 
 const internshipDetails = {
@@ -32,13 +39,6 @@ const internshipDetails = {
     { name: "NDA Agreement.pdf", type: "PDF" },
     { name: "Onboarding Guide.docx", type: "DOCX" },
   ],
-  timeline: [
-    { label: "Application Accepted", date: "Dec 20, 2023", done: true },
-    { label: "Onboarding Completed", date: "Jan 15, 2024", done: true },
-    { label: "Mid-term Review", date: "Apr 15, 2024", done: true },
-    { label: "Final Evaluation", date: "Jul 10, 2024", done: false },
-    { label: "Internship Completion", date: "Jul 15, 2024", done: false },
-  ],
 };
 
 function InternshipDetailsModal({ onClose }) {
@@ -52,9 +52,9 @@ function InternshipDetailsModal({ onClose }) {
         onClick={onClose}
       />
 
-      {/* Modal - center me */}
+      {/* Modal Card */}
       <div className="relative w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col animate-[popIn_0.2s_ease-out] overflow-hidden">
-        {/* Right side cross button */}
+        {/* Close Button */}
         <button
           onClick={onClose}
           aria-label="Close details"
@@ -63,7 +63,7 @@ function InternshipDetailsModal({ onClose }) {
           <X className="w-5 h-5" />
         </button>
 
-        {/* Scrollable content */}
+        {/* Scrollable Content */}
         <div className="overflow-y-auto p-6 sm:p-8 space-y-7">
           {/* Header */}
           <div className="flex items-start gap-4 pr-10">
@@ -112,7 +112,7 @@ function InternshipDetailsModal({ onClose }) {
             </div>
           </div>
 
-          {/* Description */}
+          {/* About */}
           <div>
             <h3 className="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide">
               About this Internship
@@ -120,7 +120,7 @@ function InternshipDetailsModal({ onClose }) {
             <p className="text-sm text-gray-600 leading-relaxed">{d.description}</p>
           </div>
 
-          {/* Responsibilities */}
+          {/* Key Responsibilities */}
           <div>
             <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide">
               Key Responsibilities
@@ -135,7 +135,7 @@ function InternshipDetailsModal({ onClose }) {
             </ul>
           </div>
 
-          {/* Skills */}
+          {/* Skills Involved */}
           <div>
             <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide">
               Skills Involved
@@ -152,7 +152,7 @@ function InternshipDetailsModal({ onClose }) {
             </div>
           </div>
 
-          {/* Mentor */}
+          {/* Mentor Details */}
           <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
             <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide">
               Mentor
@@ -192,7 +192,6 @@ function InternshipDetailsModal({ onClose }) {
             </div>
           </div>
         </div>
-        
       </div>
     </div>
   );
@@ -241,7 +240,7 @@ export default function RecentInternship() {
             <span className="font-semibold text-blue-600">65%</span>
           </div>
           <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full w-[65%] bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+            <div className="h-full w-[65%] bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
           </div>
           <div className="flex items-center justify-between text-xs text-gray-500 mt-2">
             <span>Started: Jan 15, 2024</span>
@@ -265,7 +264,7 @@ export default function RecentInternship() {
         </div>
       </div>
 
-      {/* Modal - View Details click karne pe center me aata hai */}
+      {/* Details Modal */}
       {showDetails && <InternshipDetailsModal onClose={() => setShowDetails(false)} />}
     </div>
   );

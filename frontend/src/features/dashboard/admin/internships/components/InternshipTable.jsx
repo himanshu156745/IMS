@@ -1,7 +1,7 @@
 import { useState, Fragment } from "react";
 import { ChevronRight, ChevronDown, Eye, Pencil, Users, RefreshCcw, Archive, Trash2 } from "lucide-react";
 import DropdownMenu from "../../../../../components/ui/DropdownMenu";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "../../../../../components/ui/StatusBadge";
 import InternshipDetailsPanel from "./InternshipDetailsPanel";
 import { TableRowSkeleton } from "../../../../../components/ui/SkeletonLoader";
 import EmptyState from "../../../../../components/ui/EmptyState";
