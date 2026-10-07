@@ -25,10 +25,14 @@ export const studentRoutes = {
             path: "view-internships",
             element: <ViewInternships />
         },
-        {
-            path: "apply/:internshipId",
-            element: <ApplyInternship />
-        },
+      {
+    path: "apply",
+    element: <ApplyInternship />
+},
+{
+    path: "apply/:internshipId",
+    element: <ApplyInternship />
+},
         {
             path: "applications",
             element: <MyApplications />
