@@ -1,12 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import {
-  User,
-  Mail,
-  Lock,
-  Briefcase,
-} from "lucide-react";
+import { User, Mail, Lock, Briefcase } from "lucide-react";
 import axiosInstance from "../utils/axiosInstance";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -22,6 +19,7 @@ export default function Signup() {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+
     setMessage("");
 
     // Validate role
@@ -268,24 +266,34 @@ export default function Signup() {
             <div className="my-5 flex items-center gap-3">
               <div className="h-px flex-1 bg-slate-200" />
 
-              <span className="text-sm text-slate-400">or</span>
+              <span className="text-sm text-slate-400">
+                or
+              </span>
 
               <div className="h-px flex-1 bg-slate-200" />
             </div>
 
-            {/* Google Signup - currently disabled */}
+            {/* Google Signup */}
             <button
               type="button"
-              disabled
-              className="flex w-full cursor-not-allowed items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3.5 font-bold text-slate-400"
+              onClick={() => {
+                window.location.href = `${API_URL}/auth/google`;
+              }}
+              className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3.5 font-bold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50"
             >
-              <span className="text-lg font-extrabold">G</span>
+              <img
+                src="https://www.google.com/favicon.ico"
+                alt="Google"
+                className="h-5 w-5"
+              />
+
               Continue with Google
             </button>
 
             {/* Login */}
             <p className="mt-5 text-center text-sm text-slate-500">
               Already have an account?{" "}
+
               <Link
                 to="/login"
                 className="font-bold text-blue-600 hover:underline"
