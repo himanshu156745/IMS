@@ -1,40 +1,51 @@
-import CompanyDashLayout from "../layouts/CompanyDashLayout";
-import CompanyDashboard from "../features/dashboard/company/dashboard/CompanyDashboard";
-import CompanyInternships from "../features/dashboard/company/internships/CompanyInternships";
-import CompanyApplications from "../features/dashboard/company/applications/CompanyApplications";
-import CompanyProfile from "../features/dashboard/company/profile/CompanyProfile";
-import CompanySettings from "../features/dashboard/company/settings/CompanySettings";
+import DashboardLayout from "../features/dashboard/company/layouts/DashboardLayout";
+
+import Dashboard from "../features/dashboard/company/pages/Dashboard";
+import ManageInternships from "../features/dashboard/company/pages/ManageInternships";
+import ViewApplications from "../features/dashboard/company/pages/ViewApplications";
+import CompanyProfile from "../features/dashboard/company/pages/CompanyProfile";
+import AssignedStudents from "../features/dashboard/company/pages/AssignedStudents";
+import PostInternship from "../features/dashboard/company/pages/PostInternship";
+
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 
 const companyRoutes = {
-    path: "/company",
-    element: (
-        <ProtectedRoute allowedRoles={['company']}>
-            <CompanyDashLayout />
-        </ProtectedRoute>
-    ),
-    children: [
-        {
-            index: true,
-            element: <CompanyDashboard />
-        },
-        {
-            path: "internships",
-            element: <CompanyInternships />
-        },
-        {
-            path: "applications",
-            element: <CompanyApplications />
-        },
-        {
-            path: "profile",
-            element: <CompanyProfile />
-        },
-        {
-            path: "settings",
-            element: <CompanySettings />
-        },
-    ]
+  path: "/company",
+  element: (
+    <ProtectedRoute allowedRoles={["company"]}>
+      <DashboardLayout />
+    </ProtectedRoute>
+  ),
+  children: [
+    {
+      index: true,
+      element: <Dashboard />,
+    },
+    {
+      path: "dashboard",
+      element: <Dashboard />,
+    },
+    {
+      path: "manage-internships",
+      element: <ManageInternships />,
+    },
+    {
+      path: "post-internship",
+      element: <PostInternship />,
+    },
+    {
+      path: "view-applications",
+      element: <ViewApplications />,
+    },
+    {
+      path: "assigned-students",
+      element: <AssignedStudents />,
+    },
+    {
+      path: "profile",
+      element: <CompanyProfile />,
+    },
+  ],
 };
 
 export default companyRoutes;
