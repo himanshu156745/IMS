@@ -24,18 +24,18 @@ export default function Login() {
     setMessage("");
 
     try {
-      const data = await login(email.trim(), password);
+      const data = await login(email.trim().toLowerCase(), password);
 
       setMessage("Login successful.");
 
       const role = data.user.role;
 
       setTimeout(() => {
-        if (role === "admin") {
+        if (role === "admin" || role === "super_admin") {
           navigate("/admin");
         } else if (role === "student") {
           navigate("/students");
-        } else if (role === "faculty") {
+        } else if (role === "faculty" || role === "mentor") {
           navigate("/faculty");
         } else if (role === "company") {
           navigate("/company");
@@ -51,6 +51,14 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    const API_URL =
+      import.meta.env.VITE_API_URL ||
+      "http://localhost:3001/api/v1";
+
+    window.location.href = `${API_URL}/auth/google`;
   };
 
   return (
@@ -174,17 +182,18 @@ export default function Login() {
               <div className="h-px flex-1 bg-slate-200" />
             </div>
 
+            {/* Google Login */}
             <button
               type="button"
-              disabled
-              className="flex w-full cursor-not-allowed items-center justify-center gap-3 rounded-xl border-2 border-slate-200 py-3 font-semibold text-slate-400"
+              onClick={handleGoogleLogin}
+              className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-slate-200 py-3 font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50"
             >
               <img
                 src="https://www.google.com/favicon.ico"
                 alt="Google"
                 className="h-5 w-5"
               />
-              Google Login
+              Continue with Google
             </button>
 
             <p className="text-center text-sm text-slate-500">
