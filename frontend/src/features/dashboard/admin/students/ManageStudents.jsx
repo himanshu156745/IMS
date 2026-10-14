@@ -12,7 +12,7 @@ import DocumentPreviewModal from "./components/DocumentPreviewModal";
 import EmailModal from "./components/EmailModal";
 import ConfirmationModal from "./components/ConfirmationModal";
 import axiosInstance from "../../../../utils/axiosInstance";
-import { unwrapList } from "../../../../utils/api";
+import { unwrapList, sanitizeCsvCell } from "../../../../utils/api";
 import toast from "react-hot-toast";
 
 const PAGE_SIZE = 10;
@@ -198,17 +198,17 @@ export default function ManageStudents() {
       "Hiring Status",
     ];
     const csvRows = [
-      headers.join(","),
+      headers.map(sanitizeCsvCell).join(","),
       ...filtered.map((s) =>
         [
-          `"${s.name || ""}"`,
-          `"${s.email || ""}"`,
-          `"${s.college || ""}"`,
-          `"${s.branch || ""}"`,
-          `"${s.semester || ""}"`,
-          `"${s.internshipApplied || ""}"`,
-          `"${s.applicationStatus || ""}"`,
-          `"${s.hiringStatus || ""}"`,
+          sanitizeCsvCell(s.name || ""),
+          sanitizeCsvCell(s.email || ""),
+          sanitizeCsvCell(s.college || ""),
+          sanitizeCsvCell(s.branch || ""),
+          sanitizeCsvCell(s.semester || ""),
+          sanitizeCsvCell(s.internshipApplied || ""),
+          sanitizeCsvCell(s.applicationStatus || ""),
+          sanitizeCsvCell(s.hiringStatus || ""),
         ].join(",")
       ),
     ];

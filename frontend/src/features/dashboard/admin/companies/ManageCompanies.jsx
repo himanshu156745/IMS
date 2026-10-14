@@ -14,7 +14,7 @@ import DeleteConfirmationModal from "./components/DeleteConfirmationModal";
 import NotificationPanel from "./components/NotificationPanel";
 import ActivityTimeline from "../../../../components/ui/ActivityTimeline";
 import axiosInstance from "../../../../utils/axiosInstance";
-import { unwrapList } from "../../../../utils/api";
+import { unwrapList, sanitizeCsvCell } from "../../../../utils/api";
 import { toast } from "react-hot-toast";
 
 import {
@@ -247,7 +247,7 @@ export default function ManageCompanies() {
       c.verificationStatus,
     ]);
     const csv = [header, ...rows]
-      .map((r) => r.map((v) => `"${v}"`).join(","))
+      .map((r) => r.map(sanitizeCsvCell).join(","))
       .join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);

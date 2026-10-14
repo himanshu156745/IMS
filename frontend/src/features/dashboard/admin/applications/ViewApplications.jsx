@@ -15,7 +15,7 @@ import InterviewScheduler from "./components/InterviewScheduler";
 import EmptyApplications from "./components/EmptyApplications";
 import ApplicationsSkeleton from "./components/ApplicationsSkeleton";
 import axiosInstance from "../../../../utils/axiosInstance";
-import { unwrapList } from "../../../../utils/api";
+import { unwrapList, sanitizeCsvCell } from "../../../../utils/api";
 import toast from "react-hot-toast";
 
 const PAGE_SIZE = 10;
@@ -165,16 +165,16 @@ export default function ViewApplications() {
     }
     const headers = ["Student Name", "Email", "Internship", "Company", "Status", "Applied Date", "Match Score"];
     const csvRows = [
-      headers.join(","),
+      headers.map(sanitizeCsvCell).join(","),
       ...appsToExport.map((a) =>
         [
-          `"${a.student?.name || ""}"`,
-          `"${a.student?.email || ""}"`,
-          `"${a.internship?.role || a.internship?.name || ""}"`,
-          `"${a.internship?.company || ""}"`,
-          `"${a.status || ""}"`,
-          `"${a.timeline?.appliedDate || ""}"`,
-          a.matchScore || 0,
+          sanitizeCsvCell(a.student?.name || ""),
+          sanitizeCsvCell(a.student?.email || ""),
+          sanitizeCsvCell(a.internship?.role || a.internship?.name || ""),
+          sanitizeCsvCell(a.internship?.company || ""),
+          sanitizeCsvCell(a.status || ""),
+          sanitizeCsvCell(a.timeline?.appliedDate || ""),
+          sanitizeCsvCell(a.matchScore || 0),
         ].join(",")
       ),
     ];

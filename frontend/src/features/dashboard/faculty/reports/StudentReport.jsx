@@ -4,8 +4,11 @@ import { MdOutlineDownload, MdOutlineVisibility, MdOutlineCheckCircle, MdOutline
 import axiosInstance from "../../../../utils/axiosInstance";
 import { unwrapList } from "../../../../utils/api";
 import toast from "react-hot-toast";
+import { useAuth } from "../../../../hooks/useAuth";
+import { formatInTimeZone } from "date-fns-tz";
 
 export default function StudentReport() {
+  const { user } = useAuth();
   const { id } = useParams();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,9 +23,9 @@ export default function StudentReport() {
     const fetchInternships = async () => {
       try {
         const res = await axiosInstance.get('/internships');
-        const list = unwrapList(res);
+        const list = unwrapList(res).filter(i => !i.mentor || (i.mentor?._id || i.mentor) === user?._id);
         setInternships(list);
-        if (!selectedInternshipId && list.length > 0) {
+        if ((!selectedInternshipId || !list.some(i => i._id === selectedInternshipId)) && list.length > 0) {
           setSelectedInternshipId(list[0]._id);
         }
       } catch (err) {
@@ -30,7 +33,7 @@ export default function StudentReport() {
       }
     };
     fetchInternships();
-  }, [selectedInternshipId]);
+  }, [selectedInternshipId, user?._id]);
 
   const fetchReports = useCallback(async () => {
     if (!selectedInternshipId) {

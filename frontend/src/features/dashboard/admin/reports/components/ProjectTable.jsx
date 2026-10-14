@@ -6,6 +6,7 @@ import {
   Download,
   FileText,
 } from "lucide-react";
+import { sanitizeCsvCell } from "../../../../../utils/api";
 
 const ProjectTable = ({ internships = [] }) => {
   const [search, setSearch] = useState("");
@@ -72,17 +73,17 @@ const ProjectTable = ({ internships = [] }) => {
     if (filteredProjects.length === 0) return;
     const headers = ["Project ID", "Project Name", "Domain", "Leader", "Team Size", "Progress", "Deadline", "Status"];
     const csvRows = [
-      headers.join(","),
+      headers.map(sanitizeCsvCell).join(","),
       ...filteredProjects.map((p) =>
         [
-          `"${p.id}"`,
-          `"${p.projectName}"`,
-          `"${p.domain}"`,
-          `"${p.teamLeader}"`,
-          p.teamSize,
-          `"${p.progress}%"`,
-          `"${p.deadline}"`,
-          `"${p.status}"`,
+          sanitizeCsvCell(p.id),
+          sanitizeCsvCell(p.projectName),
+          sanitizeCsvCell(p.domain),
+          sanitizeCsvCell(p.teamLeader),
+          sanitizeCsvCell(p.teamSize),
+          sanitizeCsvCell(`${p.progress}%`),
+          sanitizeCsvCell(p.deadline),
+          sanitizeCsvCell(p.status),
         ].join(",")
       ),
     ];

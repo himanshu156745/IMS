@@ -6,10 +6,13 @@ import { TrendChart } from "../components/PerformanceChart";
 import axiosInstance from "../../../../utils/axiosInstance";
 import { unwrapList } from "../../../../utils/api";
 import toast from "react-hot-toast";
+import { useAuth } from "../../../../hooks/useAuth";
+import { formatInTimeZone } from "date-fns-tz";
 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 export default function Attendance() {
+  const { user } = useAuth();
   const currentMonthName = months[new Date().getMonth()];
   const [month, setMonth] = useState(currentMonthName);
   const [studentFilter, setStudentFilter] = useState("All");
@@ -24,7 +27,7 @@ export default function Attendance() {
     const fetchInternships = async () => {
       try {
         const res = await axiosInstance.get('/internships');
-        const list = unwrapList(res);
+        const list = unwrapList(res).filter(i => !i.mentor || (i.mentor?._id || i.mentor) === user?._id);
         setInternships(list);
         if (list.length > 0) {
           setSelectedInternshipId(list[0]._id);
@@ -34,7 +37,7 @@ export default function Attendance() {
       }
     };
     fetchInternships();
-  }, []);
+  }, [user?._id]);
 
   // Fetch attendance records when selected internship changes
   const fetchAttendance = useCallback(async () => {
@@ -80,7 +83,7 @@ export default function Attendance() {
     const present = records.filter(r => r.status === 'present').length;
     const overallPercentage = total > 0 ? Math.round((present / total) * 100) : 0;
 
-    const todayKey = new Date().toISOString().split('T')[0];
+    const todayKey = formatInTimeZone(new Date(), 'Asia/Kolkata', 'yyyy-MM-dd');
     const todayRecords = records.filter(r => r.dateKey === todayKey);
 
     const presentToday = todayRecords.filter(r => r.status === 'present').length;
@@ -112,7 +115,7 @@ export default function Attendance() {
 
   // Today's attendance list with fallback to recent records
   const todaysAttendance = useMemo(() => {
-    const todayKey = new Date().toISOString().split('T')[0];
+    const todayKey = formatInTimeZone(new Date(), 'Asia/Kolkata', 'yyyy-MM-dd');
     let source = records.filter(r => r.dateKey === todayKey);
     if (source.length === 0) {
       // If no records marked today yet, show recent records

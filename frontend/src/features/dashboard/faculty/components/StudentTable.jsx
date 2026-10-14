@@ -61,7 +61,7 @@ export default function StudentTable({ students, compact = false }) {
               </td>
               <td className="px-4 py-3.5 text-right">
                 <button
-                  onClick={() => navigate(`/student-report/${s.id}`)}
+                  onClick={() => navigate('/faculty/student-report')}
                   className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-semibold text-brand-500 transition-colors duration-150 hover:bg-brand-50"
                 >
                   View <MdChevronRight size={16} />

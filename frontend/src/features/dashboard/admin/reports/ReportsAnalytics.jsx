@@ -7,7 +7,7 @@ import { Download, FileText } from "lucide-react";
 import WeeklyReports from "./components/WeeklyReports";
 import TeamContribution from "./components/TeamContribution";
 import axiosInstance from "../../../../utils/axiosInstance";
-import { unwrapList } from "../../../../utils/api";
+import { unwrapList, sanitizeCsvCell } from "../../../../utils/api";
 
 const ReportAnalytics = () => {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -65,15 +65,15 @@ const ReportAnalytics = () => {
     if (internships.length === 0) return;
     const headers = ["Title", "Company", "Department", "Status", "Applicants", "Deadline"];
     const rows = [
-      headers.join(","),
+      headers.map(sanitizeCsvCell).join(","),
       ...internships.map((i) =>
         [
-          `"${i.name || i.title || ""}"`,
-          `"${i.company || ""}"`,
-          `"${i.department || ""}"`,
-          `"${i.status || ""}"`,
-          i.applicants || 0,
-          `"${i.deadline || ""}"`,
+          sanitizeCsvCell(i.name || i.title || ""),
+          sanitizeCsvCell(i.company || ""),
+          sanitizeCsvCell(i.department || ""),
+          sanitizeCsvCell(i.status || ""),
+          sanitizeCsvCell(i.applicants || 0),
+          sanitizeCsvCell(i.deadline || ""),
         ].join(",")
       ),
     ];

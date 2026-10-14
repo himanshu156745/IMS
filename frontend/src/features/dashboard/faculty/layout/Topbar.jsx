@@ -1,8 +1,10 @@
 import { MdMenu, MdOutlineSettings } from "react-icons/md";
 import SearchBar from "../components/SearchBar";
 import NotificationBell from "../components/NotificationBell";
+import { useAuth } from "../../../../hooks/useAuth";
 
 export default function Topbar({ onMenuClick, title = "Dashboard" }) {
+  const { user } = useAuth();
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-slate-100 bg-white/80 px-4 py-4 backdrop-blur-md sm:px-6">
       <div className="flex items-center gap-3">
@@ -39,7 +41,7 @@ export default function Topbar({ onMenuClick, title = "Dashboard" }) {
             className="h-9 w-9 rounded-full object-cover ring-2 ring-brand-50"
           />
           <div className="hidden leading-tight sm:block">
-            <p className="text-sm font-semibold text-slate-700">Dr. Meenal Kapoor</p>
+            <p className="text-sm font-semibold text-slate-700">{user?.email?.split('@')[0] || "Faculty Mentor"}</p>
             <p className="text-xs text-slate-400">Faculty Mentor</p>
           </div>
         </div>

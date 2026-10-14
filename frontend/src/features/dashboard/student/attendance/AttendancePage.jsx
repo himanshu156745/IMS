@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import axiosInstance from '../../../../utils/axiosInstance';
 import { FiCheckCircle, FiXCircle, FiClock, FiCalendar } from 'react-icons/fi';
 import { unwrapList } from '../../../../utils/api';
+import { formatInTimeZone } from 'date-fns-tz';
 
 export default function AttendancePage() {
   const [applications, setApplications] = useState([]);
@@ -62,7 +63,7 @@ export default function AttendancePage() {
     }
   };
 
-  const todayKey = new Date().toLocaleDateString('en-CA');
+  const todayKey = formatInTimeZone(new Date(), 'Asia/Kolkata', 'yyyy-MM-dd');
   const hasMarkedToday = attendanceRecords.some(r => r.dateKey === todayKey);
 
   const stats = useMemo(() => {

@@ -39,7 +39,7 @@ export function useDashboardData() {
       }
 
       setData({
-        user: userRes.value?.data?.data || null,
+        user: userRes.value?.data?.data?.user || userRes.value?.data?.data || null,
         profile: profileRes.status === 'fulfilled' ? (profileRes.value?.data?.data || null) : null,
         applications: applicationsRes.status === 'fulfilled' ? unwrapList(applicationsRes.value) : [],
         notifications: notificationsRes.status === 'fulfilled' ? unwrapList(notificationsRes.value) : [],

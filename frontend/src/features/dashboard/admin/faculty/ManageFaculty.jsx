@@ -8,7 +8,7 @@ import FacultyFilters from "./components/FacultyFilters";
 import FacultyTable from "./components/FacultyTable";
 import ConfirmationModal from "./components/ConfirmationModal";
 import axiosInstance from "../../../../utils/axiosInstance";
-import { unwrapList } from "../../../../utils/api";
+import { unwrapList, sanitizeCsvCell } from "../../../../utils/api";
 import toast from "react-hot-toast";
 
 const PAGE_SIZE = 10;
@@ -115,16 +115,16 @@ export default function ManageFaculty() {
     if (filtered.length === 0) return;
     const headers = ["Name", "Email", "Department", "Designation", "Phone", "Status", "Experience"];
     const csvRows = [
-      headers.join(","),
+      headers.map(sanitizeCsvCell).join(","),
       ...filtered.map((f) =>
         [
-          `"${f.name || ""}"`,
-          `"${f.email || ""}"`,
-          `"${f.department || ""}"`,
-          `"${f.designation || ""}"`,
-          `"${f.phone || ""}"`,
-          `"${f.status || ""}"`,
-          `"${f.experience || ""}"`,
+          sanitizeCsvCell(f.name || ""),
+          sanitizeCsvCell(f.email || ""),
+          sanitizeCsvCell(f.department || ""),
+          sanitizeCsvCell(f.designation || ""),
+          sanitizeCsvCell(f.phone || ""),
+          sanitizeCsvCell(f.status || ""),
+          sanitizeCsvCell(f.experience || ""),
         ].join(",")
       ),
     ];

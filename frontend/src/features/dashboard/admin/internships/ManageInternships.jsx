@@ -7,7 +7,7 @@ import InternshipFilters from "./components/InternshipFilters";
 import InternshipTable from "./components/InternshipTable";
 import InternshipsSkeleton from "./components/InternshipsSkeleton";
 import axiosInstance from "../../../../utils/axiosInstance";
-import { unwrapList } from "../../../../utils/api";
+import { unwrapList, sanitizeCsvCell } from "../../../../utils/api";
 import toast from "react-hot-toast";
 
 const PAGE_SIZE = 10;
@@ -142,16 +142,16 @@ export default function ManageInternships() {
     if (filtered.length === 0) return;
     const headers = ["Name", "Company", "Mentor", "Department", "Applicants", "Status", "Deadline"];
     const csvRows = [
-      headers.join(","),
+      headers.map(sanitizeCsvCell).join(","),
       ...filtered.map((r) =>
         [
-          `"${r.name || ""}"`,
-          `"${r.company || ""}"`,
-          `"${r.mentor || ""}"`,
-          `"${r.department || ""}"`,
-          r.applicants || 0,
-          `"${r.status || ""}"`,
-          `"${r.deadline || ""}"`,
+          sanitizeCsvCell(r.name || ""),
+          sanitizeCsvCell(r.company || ""),
+          sanitizeCsvCell(r.mentor || ""),
+          sanitizeCsvCell(r.department || ""),
+          sanitizeCsvCell(r.applicants || 0),
+          sanitizeCsvCell(r.status || ""),
+          sanitizeCsvCell(r.deadline || ""),
         ].join(",")
       ),
     ];
