@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 import { FaLinkedin as Linkedin, FaTwitter as Twitter } from "react-icons/fa";
 import {
     ArrowRight,
@@ -36,10 +37,10 @@ import {
 } from "recharts";
 
 const NAV_LINKS = [
-    { label: "Student", href: "#student" },
-    { label: "Faculty", href: "#faculty" },
-    { label: "Admin", href: "#admin" },
-    { label: "Company", href: "#company" },
+    { label: "Student", href: "#student", roleKey: "student", tabId: "intern", dashPath: "/students" },
+    { label: "Faculty", href: "#faculty", roleKey: "faculty", tabId: "mentor", dashPath: "/faculty" },
+    { label: "Admin", href: "#admin", roleKey: "admin", tabId: "admin", dashPath: "/admin" },
+    { label: "Company", href: "#company", roleKey: "company", tabId: "hr", dashPath: "/company" },
 ];
 
 const STATS = [
@@ -53,7 +54,67 @@ const VIEW_TABS = [
     { id: "hr", label: "HR Lead", icon: Building2 },
     { id: "mentor", label: "Mentor / Team Lead", icon: Users },
     { id: "intern", label: "Intern", icon: GraduationCap },
+    { id: "admin", label: "Admin / TPO", icon: ShieldCheck },
 ];
+
+const VIEW_CONTENT = {
+    hr: {
+        title: "Talent Acquisition & Cohort Governance",
+        description: "Accelerate candidate screening, automate offer issuance, and manage corporate hiring pipelines with zero paperwork.",
+        features: [
+            { title: "Automated Resume Match", desc: "AI-assisted candidate screening against role criteria" },
+            { title: "Tamper-Proof Offer Letters", desc: "Digitally signed offers delivered instantly" },
+            { title: "Cohort Analytics", desc: "Real-time hiring conversion rates and status pipelines" },
+        ],
+        clusterLabel: "Corporate Partner Node",
+        stat1Value: "1.2k+",
+        stat1Label: "Active Offers",
+        stat2Value: "94%",
+        stat2Label: "Acceptance Rate",
+    },
+    mentor: {
+        title: "Sprint Velocity & Rubric-Based Evaluations",
+        description: "Track intern attendance, inspect structured weekly reports, and approve sprint deliverables with actionable feedback.",
+        features: [
+            { title: "Weekly Report Rubrics", desc: "Standardized evaluation matrix for consistent grading" },
+            { title: "Attendance & Geo-Checkins", desc: "Automated tracking with instant absence notifications" },
+            { title: "Feedback & Mentorship Logs", desc: "Direct 1-on-1 sprint review and evaluation logs" },
+        ],
+        clusterLabel: "Faculty & Mentor Cluster",
+        stat1Value: "98.6%",
+        stat1Label: "Review Completion",
+        stat2Value: "4.8/5",
+        stat2Label: "Satisfaction Score",
+    },
+    intern: {
+        title: "Interactive Learning & Verified Credentials",
+        description: "Submit daily sprint updates, log attendance, review mentor feedback, and graduate with cryptographic certificates.",
+        features: [
+            { title: "Sprint Task Checklists", desc: "Clear milestone roadmaps and task management" },
+            { title: "Attendance & Daily Logs", desc: "One-click daily check-in with verified timezone keys" },
+            { title: "Cryptographic QR Certificates", desc: "Tamper-proof credentials recruiters can verify in seconds" },
+        ],
+        clusterLabel: "Student Workspace Node",
+        stat1Value: "12k+",
+        stat1Label: "Graduated Interns",
+        stat2Value: "100%",
+        stat2Label: "Credential Authenticity",
+    },
+    admin: {
+        title: "Multi-Tenant Oversight & SOC2 Auditing",
+        description: "Maintain complete structural sovereignty over departments, access levels, system exit trails, and audit trails with immutable event logs.",
+        features: [
+            { title: "Multi-Tenant Isolation", desc: "Fully isolated department workspaces" },
+            { title: "SOC2 Immutable Event Ledger", desc: "Every action logged and exportable" },
+            { title: "Tenant Telemetry & Node Health", desc: "Live health checks across every tenant" },
+        ],
+        clusterLabel: "Enterprise Cluster Node",
+        stat1Value: "24",
+        stat1Label: "Tenant Hubs",
+        stat2Value: "4.2M",
+        stat2Label: "Events / mo",
+    },
+};
 
 const LIFECYCLE = [
     { icon: UserPlus, title: "Registration", desc: "Candidate signs up and builds a profile.", meta: "Day 0" },
@@ -125,18 +186,18 @@ const FOOTER_LINKS = {
         { label: "Overview", href: "#overview" },
         { label: "Modules", href: "#modules" },
         { label: "Workflow", href: "#workflow" },
-        { label: "Pricing", href: "#pricing" },
+        { label: "Pricing", href: "#contact" },
     ],
     Roles: [
-        { label: "Student", href: "#student" },
-        { label: "Faculty", href: "#faculty" },
-        { label: "Admin", href: "#admin" },
-        { label: "Company", href: "#company" },
+        { label: "Student", href: "#student", roleKey: "student", tabId: "intern", dashPath: "/students" },
+        { label: "Faculty", href: "#faculty", roleKey: "faculty", tabId: "mentor", dashPath: "/faculty" },
+        { label: "Admin", href: "#admin", roleKey: "admin", tabId: "admin", dashPath: "/admin" },
+        { label: "Company", href: "#company", roleKey: "company", tabId: "hr", dashPath: "/company" },
     ],
     Enterprise: [
         { label: "Security", href: "#security" },
-        { label: "SOC2 Report", href: "#soc2" },
-        { label: "Integrations", href: "#integrations" },
+        { label: "SOC2 Report", href: "#security" },
+        { label: "Integrations", href: "#modules" },
         { label: "Status", href: "#status" },
     ],
 };
@@ -152,6 +213,31 @@ function Chip({ children }) {
 export default function Landing() {
     const [activeTab, setActiveTab] = useState("hr");
     const [menuOpen, setMenuOpen] = useState(false);
+    const navigate = useNavigate();
+    const auth = useAuth();
+    const user = auth?.user;
+
+    const currentView = VIEW_CONTENT[activeTab] || VIEW_CONTENT.hr;
+    const ActiveTabIcon = VIEW_TABS.find((t) => t.id === activeTab)?.icon || ShieldCheck;
+
+    const getDashboardPath = () => {
+        if (!user) return "/register";
+        if (user.role === 'admin' || user.role === 'super_admin') return "/admin";
+        if (user.role === 'faculty' || user.role === 'mentor') return "/faculty";
+        if (user.role === 'company') return "/company";
+        return "/students";
+    };
+
+    const handleRoleNav = (e, roleKey, tabId, dashPath) => {
+        e.preventDefault();
+        if (user?.role === roleKey || (roleKey === 'faculty' && user?.role === 'mentor') || user?.role === 'admin' || user?.role === 'super_admin') {
+            navigate(dashPath);
+        } else {
+            setActiveTab(tabId);
+            setMenuOpen(false);
+            document.getElementById('operating-views')?.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
 
     return (
         <div className="overflow-x-clip bg-white font-sans text-slate-900">
@@ -176,8 +262,9 @@ export default function Landing() {
                         {NAV_LINKS.map((link) => (
                             <a
                                 key={link.label}
-                                href={link.href}
-                                className="text-base font-extrabold text-slate-800 hover:text-blue-800"
+                                href={`#${link.tabId}`}
+                                onClick={(e) => handleRoleNav(e, link.roleKey, link.tabId, link.dashPath)}
+                                className="cursor-pointer text-base font-extrabold text-slate-800 hover:text-blue-800"
                             >
                                 {link.label}
                             </a>
@@ -217,9 +304,9 @@ export default function Landing() {
                             {NAV_LINKS.map((link) => (
                                 <a
                                     key={link.label}
-                                    href={link.href}
-                                    onClick={() => setMenuOpen(false)}
-                                    className="border-b border-slate-100 py-3.5 text-base font-extrabold text-slate-800 hover:text-blue-800"
+                                    href={`#${link.tabId}`}
+                                    onClick={(e) => handleRoleNav(e, link.roleKey, link.tabId, link.dashPath)}
+                                    className="cursor-pointer border-b border-slate-100 py-3.5 text-base font-extrabold text-slate-800 hover:text-blue-800"
                                 >
                                     {link.label}
                                 </a>
@@ -264,14 +351,18 @@ export default function Landing() {
                         tamper-proof QR certificates.
                     </p>
                     <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:mt-9 sm:flex-row sm:items-center">
-                        <a
-                            href="#demo"
+                        <Link
+                            to={user ? getDashboardPath() : "/register"}
                             className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-7 py-3.5 text-base font-extrabold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-lg sm:py-4"
                         >
                             Request Demo <ArrowRight className="h-5 w-5" />
-                        </a>
+                        </Link>
                         <a
                             href="#workflow"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                document.getElementById('workflow')?.scrollIntoView({ behavior: 'smooth' });
+                            }}
                             className="rounded-lg border-2 border-white/40 px-7 py-3.5 text-center text-base font-extrabold text-white transition-all duration-200 hover:-translate-y-0.5 hover:border-white/70 sm:py-4"
                         >
                             See how it works
@@ -281,7 +372,7 @@ export default function Landing() {
             </section>
 
             {/* Stats */}
-            <section className="border-y border-slate-100 bg-white py-10 sm:py-14">
+            <section id="overview" className="border-y border-slate-100 bg-white py-10 sm:py-14">
                 <div className="mx-auto grid max-w-5xl grid-cols-2 gap-x-4 gap-y-8 px-4 text-center sm:grid-cols-4 sm:gap-8 sm:px-8">
                     {STATS.map((s) => (
                         <div key={s.label}>
@@ -293,7 +384,9 @@ export default function Landing() {
             </section>
 
             {/* One OS. Four operating views */}
-            <section className="bg-slate-50 py-16 sm:py-20 lg:py-28">
+            <section id="operating-views" className="relative bg-slate-50 py-16 sm:py-20 lg:py-28">
+                <div id="security" className="absolute -top-24" />
+                <div id="soc2" className="absolute -top-24" />
                 <div className="mx-auto max-w-6xl px-4 sm:px-8">
                     <div className="text-center">
                         <Chip>Architected for Every Stakeholder</Chip>
@@ -323,56 +416,44 @@ export default function Landing() {
                     </div>
 
                     <div className="mt-10 grid gap-5 sm:mt-12 lg:grid-cols-2">
+                        {/* Card 1: Role Overview & Features */}
                         <div className="min-w-0 rounded-2xl bg-slate-900 p-6 text-white sm:p-9">
-                            <ShieldCheck className="h-8 w-8 text-blue-400 sm:h-9 sm:w-9" />
+                            <ActiveTabIcon className="h-8 w-8 text-blue-400 sm:h-9 sm:w-9" />
                             <h3 className="mt-5 text-xl font-extrabold sm:mt-6 sm:text-2xl">
-                                Multi-Tenant Oversight & SOC2 Auditing
+                                {currentView.title}
                             </h3>
                             <p className="mt-4 text-sm leading-relaxed text-slate-400 sm:text-base">
-                                Maintain complete structural sovereignty over departments,
-                                access levels, system exit trails, and audit trails with
-                                immutable event logs.
+                                {currentView.description}
                             </p>
                             <div className="mt-6 space-y-3 sm:mt-7">
-                                <div className="flex items-start gap-3 rounded-lg bg-white/5 p-3.5 sm:p-4">
-                                    <Users className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-400" />
-                                    <div>
-                                        <p className="text-sm font-bold sm:text-base">Multi-Tenant Isolation</p>
-                                        <p className="text-sm text-slate-400">Fully isolated department workspaces</p>
+                                {currentView.features.map((feat, idx) => (
+                                    <div key={idx} className="flex items-start gap-3 rounded-lg bg-white/5 p-3.5 sm:p-4">
+                                        <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-400" />
+                                        <div>
+                                            <p className="text-sm font-bold sm:text-base">{feat.title}</p>
+                                            <p className="text-sm text-slate-400">{feat.desc}</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="flex items-start gap-3 rounded-lg bg-white/5 p-3.5 sm:p-4">
-                                    <ShieldCheck className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-400" />
-                                    <div>
-                                        <p className="text-sm font-bold sm:text-base">SOC2 Immutable Event Ledger</p>
-                                        <p className="text-sm text-slate-400">Every action logged and exportable</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3 rounded-lg bg-white/5 p-3.5 sm:p-4">
-                                    <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-400" />
-                                    <div>
-                                        <p className="text-sm font-bold sm:text-base">Tenant Telemetry & Node Health</p>
-                                        <p className="text-sm text-slate-400">Live health checks across every tenant</p>
-                                    </div>
-                                </div>
+                                ))}
                             </div>
                         </div>
 
+                        {/* Card 2: Cluster Node Stats & Telemetry */}
                         <div className="min-w-0 rounded-2xl bg-slate-950 p-5 sm:p-7">
                             <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 sm:text-sm">
-                                <span>Enterprise Cluster Node</span>
+                                <span>{currentView.clusterLabel}</span>
                                 <span className="flex items-center gap-1.5 text-emerald-400">
                                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> All Systems Nominal
                                 </span>
                             </div>
                             <div className="mt-6 grid grid-cols-2 gap-4 sm:mt-7">
                                 <div>
-                                    <p className="text-3xl font-extrabold text-white sm:text-4xl">24</p>
-                                    <p className="text-sm text-slate-500">Tenant Hubs</p>
+                                    <p className="text-3xl font-extrabold text-white sm:text-4xl">{currentView.stat1Value}</p>
+                                    <p className="text-sm text-slate-500">{currentView.stat1Label}</p>
                                 </div>
                                 <div>
-                                    <p className="text-3xl font-extrabold text-white sm:text-4xl">4.2M</p>
-                                    <p className="text-sm text-slate-500">Events / mo</p>
+                                    <p className="text-3xl font-extrabold text-white sm:text-4xl">{currentView.stat2Value}</p>
+                                    <p className="text-sm text-slate-500">{currentView.stat2Label}</p>
                                 </div>
                             </div>
                             <div className="mt-6 h-32 w-full sm:mt-7 sm:h-36">
@@ -398,7 +479,7 @@ export default function Landing() {
             </section>
 
             {/* 6-stage lifecycle */}
-            <section className="py-16 sm:py-20 lg:py-28">
+            <section id="workflow" className="py-16 sm:py-20 lg:py-28">
                 <div className="mx-auto max-w-6xl px-4 sm:px-8">
                     <div className="text-center">
                         <Chip>Automated Cognitive Onboarding</Chip>
@@ -433,7 +514,7 @@ export default function Landing() {
             </section>
 
             {/* Purpose-built modules */}
-            <section className="bg-slate-50 py-16 sm:py-20 lg:py-28">
+            <section id="modules" className="bg-slate-50 py-16 sm:py-20 lg:py-28">
                 <div className="mx-auto max-w-6xl px-4 sm:px-8">
                     <div className="text-center">
                         <Chip>Engineered for Outcomes</Chip>
@@ -465,7 +546,7 @@ export default function Landing() {
             </section>
 
             {/* Our Culture — split panel */}
-            <section className="px-4 py-16 sm:px-8 sm:py-20 lg:py-28">
+            <section id="culture" className="px-4 py-16 sm:px-8 sm:py-20 lg:py-28">
                 <div className="mx-auto flex max-w-6xl flex-col overflow-hidden rounded-2xl border border-slate-100 shadow-lg shadow-slate-100 md:flex-row">
                     <div className="relative min-h-[240px] flex-1 overflow-hidden sm:min-h-[320px] md:min-h-[420px]">
                         <img
@@ -484,7 +565,14 @@ export default function Landing() {
                             a holistic lifestyle that promotes a culture of continuous
                             learning and growth.
                         </p>
-                        <a href="#culture" className="group mt-7 inline-flex items-center gap-3 text-base font-extrabold text-slate-900 sm:mt-8">
+                        <a
+                            href="#culture"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                document.getElementById('culture')?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="group mt-7 inline-flex items-center gap-3 text-base font-extrabold text-slate-900 sm:mt-8"
+                        >
                             Get a glimpse
                             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white transition-transform duration-200 group-hover:translate-x-1">
                                 <ArrowRight className="h-4 w-4" />
@@ -576,7 +664,8 @@ export default function Landing() {
             </section>
 
             {/* Analytics section */}
-            <section className="py-16 sm:py-20 lg:py-28">
+            <section id="analytics" className="relative py-16 sm:py-20 lg:py-28">
+                <div id="status" className="absolute -top-24" />
                 <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-8 lg:grid-cols-2 lg:items-center lg:gap-14">
                     <div className="min-w-0">
                         <Chip>Live Data Dashboard</Chip>
@@ -684,10 +773,20 @@ export default function Landing() {
                         with autonomous pipeline orchestration.
                     </p>
                     <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:mt-9 sm:flex-row sm:items-center">
-                        <a href="#demo" className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3.5 text-base font-extrabold text-white transition-colors duration-150 hover:bg-blue-500 sm:px-7 sm:py-4">
+                        <Link
+                            to={user ? getDashboardPath() : "/register"}
+                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3.5 text-base font-extrabold text-white transition-colors duration-150 hover:bg-blue-500 sm:px-7 sm:py-4"
+                        >
                             Request Enterprise Demo <ArrowRight className="h-5 w-5" />
-                        </a>
-                        <a href="#contact" className="rounded-lg border-2 border-slate-700 px-6 py-3.5 text-center text-base font-extrabold text-white transition-colors duration-150 hover:bg-slate-800 sm:px-7 sm:py-4">
+                        </Link>
+                        <a
+                            href="#contact"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="rounded-lg border-2 border-slate-700 px-6 py-3.5 text-center text-base font-extrabold text-white transition-colors duration-150 hover:bg-slate-800 sm:px-7 sm:py-4"
+                        >
                             Talk to Solutions Architect
                         </a>
                     </div>
@@ -699,7 +798,7 @@ export default function Landing() {
             </section>
 
             {/* Footer */}
-            <footer className="border-t border-slate-700 bg-slate-800">
+            <footer id="contact" className="border-t border-slate-700 bg-slate-800">
                 {/* Certification strip */}
                 <div className="border-b border-slate-700 bg-slate-900/60 px-4 py-3">
                     <p className="text-center text-[11px] font-bold uppercase leading-relaxed tracking-wider text-slate-400 sm:text-xs sm:tracking-widest">
@@ -766,9 +865,32 @@ export default function Landing() {
                                 <ul className="mt-4 space-y-3 sm:mt-5">
                                     {links.map((link) => (
                                         <li key={link.label}>
-                                            <a href={link.href} className="text-base text-slate-400 transition-colors duration-150 hover:text-white">
-                                                {link.label}
-                                            </a>
+                                            {heading === "Roles" ? (
+                                                <a
+                                                    href={link.href}
+                                                    onClick={(e) => handleRoleNav(e, link.roleKey, link.tabId, link.dashPath)}
+                                                    className="cursor-pointer text-base text-slate-400 transition-colors duration-150 hover:text-white"
+                                                >
+                                                    {link.label}
+                                                </a>
+                                            ) : (
+                                                <a
+                                                    href={link.href}
+                                                    onClick={(e) => {
+                                                        if (link.href?.startsWith("#")) {
+                                                            const targetId = link.href.slice(1);
+                                                            const el = document.getElementById(targetId);
+                                                            if (el) {
+                                                                e.preventDefault();
+                                                                el.scrollIntoView({ behavior: 'smooth' });
+                                                            }
+                                                        }
+                                                    }}
+                                                    className="text-base text-slate-400 transition-colors duration-150 hover:text-white"
+                                                >
+                                                    {link.label}
+                                                </a>
+                                            )}
                                         </li>
                                     ))}
                                 </ul>
@@ -779,9 +901,36 @@ export default function Landing() {
                     <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-slate-700 pt-7 text-sm text-slate-400 sm:mt-14 sm:flex-row sm:items-center">
                         <p>© {new Date().getFullYear()} IMS Engine. All rights reserved.</p>
                         <div className="flex flex-wrap gap-x-6 gap-y-2">
-                            <a href="#privacy" className="hover:text-slate-300">Privacy</a>
-                            <a href="#terms" className="hover:text-slate-300">Terms</a>
-                            <a href="#soc2" className="hover:text-slate-300">SOC2 Report</a>
+                            <a
+                                href="#contact"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                                }}
+                                className="hover:text-slate-300"
+                            >
+                                Privacy
+                            </a>
+                            <a
+                                href="#contact"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                                }}
+                                className="hover:text-slate-300"
+                            >
+                                Terms
+                            </a>
+                            <a
+                                href="#security"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    document.getElementById('security')?.scrollIntoView({ behavior: 'smooth' });
+                                }}
+                                className="hover:text-slate-300"
+                            >
+                                SOC2 Report
+                            </a>
                         </div>
                     </div>
                 </div>
