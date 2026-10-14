@@ -1,0 +1,14 @@
+﻿node_modules/
+**/node_modules/
+dist/
+**/dist/
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+backend/temp/
+PROJECT_FULL_CODE.txt
+extractCode.js
+*.log
+.DS_Store

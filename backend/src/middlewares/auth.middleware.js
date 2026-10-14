@@ -1,0 +1,72 @@
+const jwt = require('jsonwebtoken');
+const ApiError = require('../utils/ApiError');
+const asyncHandler = require('../utils/asyncHandler');
+const User = require('../models/User.model');
+
+const IS_PROD = process.env.NODE_ENV === 'production';
+const ACCESS_COOKIE_NAME = IS_PROD ? '__Host-ims_session' : 'ims_session';
+const REFRESH_COOKIE_NAME = IS_PROD ? '__Host-ims_refresh' : 'ims_refresh';
+
+const verifyJWT = asyncHandler(async (req, res, next) => {
+    try {
+        // 1. Get token from cookies OR Authorization header (Bearer token)
+        const token = req.cookies?.['__Host-ims_session'] || req.cookies?.['ims_session'] || req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+
+        if (!token) {
+            throw new ApiError(401, "Unauthorized request - Token missing");
+        }
+
+        // 2. Verify token (algorithm pinned)
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+
+        // 3. Find user from decoded token payload
+        const user = await User.findById(decodedToken.id).select("-password");
+
+        if (!user || user.deletedAt) {
+            throw new ApiError(401, "Invalid Access Token - User not found or deleted");
+        }
+
+        if (!user.isActive) {
+            throw new ApiError(403, "Account is disabled. Please contact support.");
+        }
+
+        // 4. Validate token version to guarantee instantaneous session revocation
+        if (decodedToken.tokenVersion !== undefined && user.tokenVersion !== undefined) {
+            if (decodedToken.tokenVersion !== user.tokenVersion) {
+                throw new ApiError(401, "Session expired or revoked. Please log in again.");
+            }
+        }
+
+        // 5. Attach user to request object for further middlewares/controllers
+        req.user = user;
+        next();
+    } catch (error) {
+        if (error instanceof ApiError) throw error;
+        if (error.name === 'TokenExpiredError') {
+            throw new ApiError(401, "Token expired. Please log in again.");
+        }
+        throw new ApiError(401, "Invalid access token");
+    }
+});
+
+const authorizeRoles = (...roles) => {
+    return (req, res, next) => {
+        if (!req.user || !roles.includes(req.user.role)) {
+            throw new ApiError(403, "You don't have permission to perform this action");
+        }
+        next();
+    };
+};
+
+const requireVerifiedEmail = (req, res, next) => {
+    // In test, development, or demo mode, allow unverified users to avoid breaking workflows
+    if (process.env.NODE_ENV !== 'production' || req.user.emailVerified) {
+        return next();
+    }
+    if (!req.user.emailVerified) {
+        return next(new ApiError(403, "Please verify your email."));
+    }
+    next();
+};
+
+module.exports = { verifyJWT, authorizeRoles, requireVerifiedEmail };
